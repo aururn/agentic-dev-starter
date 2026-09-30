@@ -121,11 +121,23 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
     git switch <base> && git pull --ff-only
     git rev-parse <merge した branch>             # 確認済み SHA と一致するか確かめる
     git branch -D <merge した branch>             # 一致した場合だけ
-    git push origin --delete <merge した branch>  # repository の設定で自動削除される場合は不要
+    git ls-remote origin refs/heads/<merge した branch>   # remote の branch の先端を読む
+    git push --force-with-lease=<merge した branch>:<確認済み SHA> origin :<merge した branch>   # 一致した場合だけ
     ```
 
     local の branch が確認済み SHA と違う場合は，push していない commit があるので branch を消さずに止まり，報告する．
     squash merge では branch が merge 済みと判定されないため，`git branch -d` ではなく，SHA の一致で判断する．
+
+    remote の branch は，`git ls-remote` の結果で次のように扱う．merge の後に他の人が push した commit を消さないため．
+
+    | remote の branch の先端 | 扱い |
+    | --- | --- |
+    | 空（repository の設定で自動削除された場合など） | 消さない．既に消えている |
+    | 確認済み SHA と一致する | lease を付けて消す |
+    | 確認済み SHA と違う | 消さずに止まり，先端の SHA と，確認済み SHA の後の commit を報告する |
+
+    lease（`--force-with-lease=<branch>:<確認済み SHA>`）により，読んだ後に push があった場合も削除は `stale info` で失敗する．
+    失敗した場合は，もう一度消そうとせず，止まって報告する．
 11. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
 
 ## release PR
@@ -172,3 +184,4 @@ branch の削除に関わるものは行わない．
 - 利用者の明示の依頼なしに merge すること．「進めて」は merge の依頼に含めない．
 - 確認に失敗した状態で，required check を迂回して merge すること（`--admin` を使わない）．
 - `release.from` の branch を削除すること．
+- 先端が確認済み SHA と違う branch を，local でも remote でも削除すること．

@@ -28,18 +28,47 @@ description: 作業中の Issue を中断する，再開する，別の人や別
 ## 再開する
 
 1. **バトンを読む**．`次の一手` と `手元だけにあるもの` を確かめる．
-2. **担当を確かめる**．自分以外が Assignee の場合は，利用者が交代を依頼していない限り止まって報告する．
-3. **branch を取り込む**．
+2. **担当を取る**．Assignee を読み，次のように扱う．
+
+   | Assignee | 扱い |
+   | --- | --- |
+   | 自分 | そのまま進む |
+   | 空 | 自分を Assignee にする |
+   | 自分以外 | 利用者が交代を依頼した場合だけ，相手を外して自分を Assignee にする．それ以外は止まって報告する |
 
    ```bash
-   git fetch origin
-   git switch <branch> && git pull --ff-only
+   gh issue view <番号> --json assignees --jq '.assignees[].login'
+   gh issue edit <番号> --add-assignee @me                          # 空の場合
+   gh issue edit <番号> --add-assignee @me --remove-assignee <相手>  # 交代を依頼された場合
    ```
 
-   worktree を使う場合は，その作業場所に移る．
+   Assignee を変えた場合は，直後に読み直す．他の人が同時に担当になっていたら止まって報告する．
+   バトンの担当は手順 5 で自分にする．
+3. **作業場所に移り，branch を取り込む**．branch が別の worktree で checkout 済みの場合，今の作業場所では
+   `git switch` が失敗する．先に，branch を checkout している worktree を探す．
+
+   ```bash
+   git worktree list --porcelain   # 「branch refs/heads/<branch>」の行と同じ塊の「worktree」の行が作業場所
+   ```
+
+   - 別の worktree で checkout 済みの場合：その worktree に移り，そこで取り込む．
+     その worktree の path がない（`prunable` と表示される）場合は，`git worktree prune` をしてから次の場合に進む．
+   - どの worktree でも checkout されていない場合：今の作業場所で `git switch <branch>` をしてから取り込む．
+
+   ```bash
+   cd <branch を checkout している worktree>   # 別の worktree で checkout 済みの場合だけ
+   git fetch origin
+   git switch <branch>                         # どの worktree でも checkout されていない場合だけ
+   git status                                  # バトンの「手元だけにあるもの」と比べる
+   git pull --ff-only
+   ```
+
+   バトンに書かれていない未 commit の変更がある場合と，`git pull --ff-only` が失敗した場合は，
+   その作業場所の変更を消さずに止まって報告する．
 4. **ずれを確かめる**．base の最新と比べ，衝突がないか確かめる．バトンの内容と branch の状態が食い違う場合は，
    branch の状態を正として，食い違いを報告する．
-5. **バトンを `実装中` にし**，状態 label を `relay:working` にしてから，`relay-build` の続きの手順に戻る．
+5. **バトンを `実装中` にし**，バトンの担当を自分にし，状態 label を `relay:working` にしてから，`relay-build` の続きの手順に戻る．
+   以降の作業は，手順 3 で移った作業場所で行う．
 
 ## 渡す
 
