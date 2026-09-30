@@ -1,0 +1,60 @@
+# Relay の運用設定．relay-* skill はこの file を読んで動く．
+# 項目の説明と既定値：relay-core/references/profile.md
+version: 1
+
+# Issue，PR，comment の言語（ja または en）
+language: ja
+
+# 作業 branch の起点と，PR の統合先
+base: main
+
+# 作業 branch の名前．{type} {number} {slug} {agent} が使える
+branch: "{type}/{number}-{slug}"
+
+# commit message：conventional または free
+commit: conventional
+
+# PR title：conventional または plain
+pr_title: conventional
+
+checks:
+  # 実装中に何度も実行する，速い検査
+  fast: []
+  # push の前に必ず実行する検査．CI と同じにする
+  full: []
+  # 利用者の承認が要る検査（有料の API，外部サービス，長時間）
+  gated: []
+
+review:
+  # auto，subagent，none，または command（{base} が使える）
+  independent: auto
+
+labels:
+  type:
+    feat: "type:feat"
+    fix: "type:fix"
+    refactor: "type:refactor"
+    docs: "type:docs"
+    chore: "type:chore"
+    spike: "type:spike"
+    epic: "epic"
+  size:
+    S: "size:S"
+    M: "size:M"
+    L: "size:L"
+
+# GitHub Projects に登録する場合：{ owner: <owner>, number: <number> }
+projects: null
+
+# 依存する Issue の PR を，依存先の branch の上に積むか
+stack: false
+
+# 並列作業の置き場所．{repo} {number} が使える．null なら使わない
+worktree: null
+
+merge:
+  # squash，merge，rebase のどれか
+  method: squash
+
+# 統合 branch から本番 branch への release PR を使う場合：{ from: staging, to: main }
+release: null

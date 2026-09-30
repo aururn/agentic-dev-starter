@@ -1,0 +1,43 @@
+name: 大項目
+description: 複数の Issue に分けて進める目標．実装は sub-issue で行う
+title: ""
+body:
+  - type: markdown
+    attributes:
+      value: |
+        大項目は PR で閉じない．実際の親子関係と依存は，GitHub の sub-issue と blocked by で管理する．
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: ゴール
+      description: 全て終わったとき，誰が何をできるようになるか
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了の姿
+      value: |
+        - [ ] 全ての sub-issue が close されている
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: split
+    attributes:
+      label: 分け方
+      description: 計画時点の案．依存の順に並べ，大きさ（S，M）と依存を括弧で書く
+      value: |
+        1.
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 範囲の外
+    validations:
+      required: true

@@ -1,0 +1,78 @@
+name: 不具合
+description: 期待と違う動作の修正
+title: ""
+body:
+  - type: markdown
+    attributes:
+      value: |
+        secret，token，個人情報を log や画像に含めない．
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 深刻度
+      options:
+        - P0：data が壊れる，security の穴，全員が使えない
+        - P1：主な機能が使えず，回避できない
+        - P2：一部が使えないが，回避できる
+        - P3：見た目などの軽いもの
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 起きていること
+      description: 今どうなっていて，誰が困っているか
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 振る舞いの例
+      description: 直った後の期待．再現手順の状況を 1 行目に書く
+      value: |
+        | 状況 | 入力・操作 | 期待する結果 |
+        | --- | --- | --- |
+        |  |  |  |
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境
+      description: commit，OS，browser，環境（本番，staging，手元）
+    validations:
+      required: true
+
+  - type: textarea
+    id: clues
+    attributes:
+      label: 手がかり
+      description: 疑わしい code，log（機密を除く），発生頻度．原因が分からなければ「要調査：」で書く
+    validations:
+      required: false
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: 確かめ方
+      description: 不具合を再現する回帰 test をどこに置くか
+      value: |
+        - 自動：
+        - 手動：
+    validations:
+      required: true
