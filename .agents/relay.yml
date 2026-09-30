@@ -1,0 +1,35 @@
+# この repository 自身の Relay の運用設定
+version: 1
+language: ja
+base: main
+branch: "{type}/{number}-{slug}"
+commit: conventional
+pr_title: conventional
+checks:
+  fast:
+    - "node scripts/validate.mjs"
+  full:
+    - "node scripts/validate.mjs"
+    - "node --test \"tests/**/*.test.mjs\""
+  gated: []
+review:
+  independent: auto
+labels:
+  type:
+    feat: "type:feat"
+    fix: "type:fix"
+    refactor: "type:refactor"
+    docs: "type:docs"
+    chore: "type:chore"
+    spike: "type:spike"
+    epic: "epic"
+  size:
+    S: "size:S"
+    M: "size:M"
+    L: "size:L"
+projects: null
+stack: false
+worktree: null
+merge:
+  method: squash
+release: null
