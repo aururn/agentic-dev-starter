@@ -1,20 +1,13 @@
-<!-- Derived from docs/decisions/README.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+# 判断の記録（ADR）
 
-# ADR
+後から変えるときに理由が必要になる判断を残す．採用した判断の意味は書き換えず，変えるときは新しい ADR を足して
+古い ADR の状態を `置き換え済み` にする．
 
-長期的な設計判断を，理由，代替案，強制方法とともに残す．
+| ADR | 判断 | 状態 |
+| --- | --- | --- |
+| [001](001-state-on-github.md) | 作業の状態を GitHub のバトン comment に置く | 採用 |
+| [002](002-profile-per-repository.md) | repository ごとの違いを `.agents/relay.yml` に集める | 採用 |
+| [003](003-examples-table.md) | 振る舞いを例の表で書く | 採用 |
+| [004](004-distribute-with-skills-cli.md) | skill を `skills` CLI で配る | 採用 |
 
-## 状態
-
-- `proposed`：提案中
-- `accepted`：採用済み．意味を直接書き換えず，新しい ADR で置き換える
-- `superseded`：別の ADR で置き換えた
-
-## 作り方
-
-[`template.md`](template.md) をコピーし，`ADR-NNN-<slug>.md` を作る．番号は連番にする．
-
-## 一覧
-
-- [ADR-001 Issue 駆動の agent 開発フロー](ADR-001-issue-driven-agent-workflow.md)
-- [ADR-002 skill の正本を .agents/skills に置く](ADR-002-skills-source-of-truth.md)
+書式：背景，判断，理由，他の案，結果，の 5 節．

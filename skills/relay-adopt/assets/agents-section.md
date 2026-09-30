@@ -1,24 +1,3 @@
-# AGENTS.md
-
-この repository は Relay の skill pack である．配るものは `skills/` にあり，導入先の repository に置く file は
-`skills/relay-adopt/assets/` にある．設計は [docs/concept.md](docs/concept.md)，判断は [docs/decisions/](docs/decisions/README.md) にある．
-
-## この repository を変えるときの規則
-
-- 文書，skill，comment は日本語で書き，句読点は「．，」を使う．非母語話者にも読みやすい，短く平易な文にする．
-- skill には repository 固有の値を書かない．違いは `relay.yml` の項目として `relay-core/references/profile.md` に足す．
-- skill の間の参照は `../relay-core/...` の相対 link にする．導入先では skill が同じ directory に並ぶため．
-- `.github/` の template，workflow，script は `skills/relay-adopt/assets/github/` の copy である．配る方を編集してから copy する．
-- 既存の skill の手順を変えるときは，その変更が既に導入した repository でどう動くかを PR の「見てほしいところ」に書く．
-- 他の repository の文書や skill の本文をコピーしない．参考にした場合は考え方だけを使い，自分の言葉で書く．
-
-## 検査
-
-```bash
-node scripts/validate.mjs
-node --test "tests/**/*.test.mjs"
-```
-
 <!-- relay:start -->
 ## Issue と PR の運用（Relay）
 

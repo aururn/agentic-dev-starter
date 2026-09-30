@@ -1,0 +1,48 @@
+name: 調査
+description: 決めるための調査．成果はコードではなく判断
+title: ""
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: 問い
+      description: この調査で答えを出す問いを 1 つ書く
+    validations:
+      required: true
+
+  - type: textarea
+    id: criteria
+    attributes:
+      label: 決め方
+      description: 答えを選ぶ基準．計れるものは数値で書く
+      value: |
+        -
+    validations:
+      required: true
+
+  - type: dropdown
+    id: timebox
+    attributes:
+      label: 時間の上限
+      description: 上限に達したら，途中の結果と続けるかの提案を書いて止める
+      options:
+        - 半日
+        - 1 日
+        - 2 日
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: 成果物
+      description: 何を残せば終わりか（比較表，試作 branch，ADR など）
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 範囲の外
+    validations:
+      required: false

@@ -1,8 +1,0 @@
-# Codex の project 設定．trusted project として開いたときに読み込まれる．
-# gh で Issue と PR を扱うため，workspace への書き込みと network を許可する．
-# 危険な操作の禁止は AGENTS.md の禁止事項を正本とする．
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-network_access = true

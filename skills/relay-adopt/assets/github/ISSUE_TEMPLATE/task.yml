@@ -1,0 +1,66 @@
+name: 作業
+description: 機能の追加，改善，文書，設定．1 つの PR で終わる大きさにする
+title: ""
+body:
+  - type: markdown
+    attributes:
+      value: |
+        最初の 3 行で「何のために，何ができれば終わりか」が分かるように書く．分からないことは「要調査」と書く．
+        1 回のレビューで読めない大きさなら「大項目」で作る．
+
+  - type: textarea
+    id: why
+    attributes:
+      label: なぜ
+      description: 今の問題と，誰が困っているか
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了の姿
+      description: 終わったと誰でも判断できる状態を，checklist で書く
+      value: |
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 振る舞いの例
+      description: 1 行に 1 つの例．境界と例外も書く．振る舞いが変わらない作業では「なし（振る舞いは変えない）」
+      value: |
+        | 状況 | 入力・操作 | 期待する結果 |
+        | --- | --- | --- |
+        |  |  |  |
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 範囲の外
+      description: この Issue ではやらないこと
+    validations:
+      required: true
+
+  - type: textarea
+    id: clues
+    attributes:
+      label: 手がかり
+      description: 関係する code，文書，制約．まだ分からないことは「要調査：」で始める
+    validations:
+      required: false
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: 確かめ方
+      description: どの test で確かめるか，手動で見るものは何か
+      value: |
+        - 自動：
+        - 手動：
+    validations:
+      required: true
