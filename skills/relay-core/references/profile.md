@@ -25,6 +25,9 @@ repository に固有の値を skill の本文へ書かない．雛形は `relay-
 | `merge.method`       | `squash`                         | `squash`，`merge`，`rebase` のどれか                                 |
 | `release`            | `null`                           | 統合 branch から本番 branch への release PR を使う場合 `{ from, to }` |
 
+`stack: true` と `merge.method` の `squash` または `rebase` を組み合わせると，下の PR を merge した後に，上の PR を
+新しい base に載せ直す必要がある（履歴の書き換えなので，push に承認が要る）．stack を使う場合は `merge.method: merge` を勧める．
+
 `checks` が全て空の場合，agent は検査を推測せず，`relay-adopt` で設定するよう利用者に伝える．
 
 ## branch 名の記号
@@ -42,12 +45,14 @@ repository に固有の値を skill の本文へ書かない．雛形は `relay-
 | -------------------------- | -------------------------------------------------------------------- |
 | `auto`                     | 実装した agent とは別の agent を優先する．下の順に，使えるものを選ぶ |
 | `subagent`                 | Claude Code の `relay-reviewer` subagent                             |
-| command の文字列           | その command を実行する．`{base}` は `base` の値に置き換える         |
+| command の文字列           | その command を実行する．`{base}` は `origin/<base>` に置き換える         |
 | `none`                     | 独立レビューをしない．PR の「見てほしいところ」に自己レビューのみと書く |
+
+どの方法でも，対象の PR の head を取り出した作業場所で実行する（`relay-review` の手順 2）．
 
 `auto` の順序：
 
-1. Claude Code で実装した場合：`codex` が使えれば `codex review --base {base}`．
+1. Claude Code で実装した場合：`codex` が使えれば `codex review --base origin/<base>`．
 2. Codex で実装した場合：`claude` が使えれば `claude -p` に relay-review の手順を渡す．
 3. 別の agent が使えない場合：Claude Code では `relay-reviewer` subagent，Codex では新しい session．
 4. どれも使えない場合：自己レビューのみであることを PR に書く．

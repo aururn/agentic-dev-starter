@@ -27,7 +27,7 @@ description: GitHub Issue を 1 件実装し，作業 branch，commit，push，D
    バトンがあれば読む（`relay-core/references/baton.md`）．`中断` のバトンがある場合は，`relay-handoff` の再開の手順に従う．
 2. **着手できるか判断する**．`formats.md` の[着手の条件](../relay-core/references/formats.md#着手の条件)を満たさない場合は，
    理由を報告して止まる．大きさ L の場合は `relay-plan` で分けることを提案する．
-3. **担当を取る**．自分を Assignee にし，状態 label を `relay:working` にして，バトンを `実装中` にする．
+3. **担当を取る**．自分を Assignee にし，状態 label を `relay:working` にして，バトンを `実装中` にする（なければ作る）．
    直後に Assignee を読み直し，他の人が同時に担当になっていたら止まって報告する．
 4. **branch を作る**．名前は `relay.yml` の `branch` に従う．起点は次のとおりにする．
    - 通常：`base`

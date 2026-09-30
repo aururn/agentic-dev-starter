@@ -1,6 +1,6 @@
 ---
 name: relay-plan
-description: 利用者の依頼を，1 つの PR で完了する大きさの GitHub Issue に分け，大項目（epic），sub-issue，依存，label，バトンを作る．「Issue に分けて」「タスクに分解して」「〇〇を作りたい」「計画を立てて」と依頼されたときに使う．
+description: 利用者の依頼を，1 つの PR で完了する大きさの GitHub Issue に分け，大項目（epic），sub-issue，依存，label を作る．「Issue に分けて」「タスクに分解して」「〇〇を作りたい」「計画を立てて」と依頼されたときに使う．
 ---
 
 # relay-plan

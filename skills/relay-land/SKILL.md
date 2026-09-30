@@ -21,10 +21,18 @@ merge は承認が必要な操作である．利用者がこの PR の merge を
 | 今の head で独立レビューが済み，P0/P1 がない      | 最後の relay-review の報告の head と，今の head を比べる          |
 | base の最新を取り込んでも衝突しない              | `gh pr view <PR> --json mergeable,mergeStateStatus`               |
 | 本文の「確認した head:」が今の head と一致する   | `gh pr view <PR> --json headRefOid,body`                          |
-| 閉じる Issue が 1 件で，その Issue が epic でない | `gh pr view <PR> --json closingIssuesReferences`                  |
+| 閉じる Issue が 1 件で，その Issue が epic でない | 下の「閉じる Issue の取り方」                                     |
 | stack の場合，下の PR が先に merge されている    | PR の base が `relay.yml` の `base` であること                    |
 
 独立レビューの後に push があった場合は，`relay-review` をやり直す．
+
+### 閉じる Issue の取り方
+
+GitHub は，PR の base が default branch の場合だけ `Closes #N` を closing link として扱う．
+
+- base が default branch の場合：`gh pr view <PR> --json closingIssuesReferences` の 1 件を使う．
+- base が default branch でない場合（例：`staging`）：`closingIssuesReferences` は空になる．PR 本文の `Closes #N` などの行から
+  番号を取り，その Issue が存在して open であることを `gh issue view` で確かめる．この場合，Issue は merge 後に手順 6 で閉じる．
 
 ## 手順
 
@@ -35,43 +43,69 @@ merge は承認が必要な操作である．利用者がこの PR の merge を
    gh pr ready <PR>
    ```
 
-3. `merge.method` で merge する．
+3. **stack の上の PR を確かめる**．この PR の branch を base にしている PR があれば，merge の後に手順 7 で付け替えるので，
+   手順 4 では `--delete-branch` を付けない．
+
+   ```bash
+   gh pr list --state open --base <この PR の branch> --json number,headRefName
+   ```
+
+4. `merge.method` で merge する．
 
    ```bash
    gh pr merge <PR> --<method> --delete-branch
    ```
 
-4. **Issue が閉じたか確かめる**．自動で閉じないことがあるため，必ず読み直す．閉じていなければ，PR を示す comment を付けて閉じる．
+5. **merge が完了したか確かめる**．merge queue や auto-merge の repository では，`gh pr merge` が成功しても queue に入っただけの
+   場合がある．`state` が `MERGED` になるまで，手順 6 以降に進まない．
+
+   ```bash
+   gh pr view <PR> --json state,mergedAt,mergeCommit
+   ```
+
+   queue に入っただけの場合は，バトンの「止まっている理由」に「merge queue の完了待ち」と書いて報告し，ここで止める．
+   後で `relay-land <PR>` をもう一度実行したときは，merge 済みであれば手順 6 から再開する．
+6. **Issue が閉じたか確かめる**．自動で閉じないことがあるため，必ず読み直す．閉じていなければ，PR を示す comment を付けて閉じる．
 
    ```bash
    gh issue view <番号> --json state
    gh issue close <番号> --comment "#<PR> で対応した．"
    ```
 
-5. **バトンを `完了` にし，状態 label を外す**．
-6. **止めていた Issue を解除する**．この Issue が止めていた Issue ごとに，open の依存が残っていなければ，
-   状態 label を `relay:blocked` から `relay:ready` にし，バトンを `準備済み` にする．
+7. **stack の上の PR を付け替える**．手順 3 で見つけた PR ごとに行う．
+   - `merge.method` が `merge` の場合：base を `relay.yml` の `base` に変えるだけでよい．
+   - `squash` または `rebase` の場合：下の PR の commit が新しい base の祖先にならないため，base を変えるだけでは上の PR の差分に
+     下の PR の変更が残る．上の PR に固有の commit だけを新しい base に載せ直す．これは履歴の書き換えなので，push の前に利用者の承認をもらう．
+
+   ```bash
+   gh pr edit <上の PR> --base <base>
+   git fetch origin
+   git rebase --onto origin/<base> <下の PR の最後の commit> <上の PR の branch>
+   git push --force-with-lease=<上の PR の branch>:<rebase 前の上の PR の head> origin <上の PR の branch>   # 承認後
+   ```
+
+   付け替えが済んだら，merge した branch を消す（`git push origin --delete <branch>`）．
+8. **バトンを `完了` にし，状態 label を外す**．
+9. **止めていた Issue を解除する**．この Issue が止めていた Issue ごとに，open の依存が残っていなければ，
+   状態 label を `relay:blocked` から `relay:ready` にする．バトンがあれば `準備済み` にする．
 
    ```bash
    gh api "repos/$repo/issues/<番号>/dependencies/blocking" --jq '.[] | select(.state=="open") | .number'
    ```
 
-7. **stack の上の PR を付け替える**．この PR の branch を base にしていた PR があれば，base を `relay.yml` の `base` に変える．
+10. **epic を確かめる**．親の epic の sub-issue が全て閉じていれば，epic の「完了の姿」を確かめ，close するかを利用者に聞く．
+11. **手元を片付ける**．Issue 用の worktree で作業していた場合，その worktree の中からは base を checkout できない
+    （base は元の作業場所で checkout されている）．次の順で行う．
 
-   ```bash
-   gh pr list --base <merge した branch> --json number
-   gh pr edit <上の PR> --base <base>
-   ```
+    ```bash
+    git worktree list                      # 1 行目が元の作業場所
+    cd <元の作業場所>
+    git worktree remove <Issue 用の worktree の path>
+    git switch <base> && git pull --ff-only
+    ```
 
-8. **epic を確かめる**．親の epic の sub-issue が全て閉じていれば，epic の「完了の姿」を確かめ，close するかを利用者に聞く．
-9. **手元を片付ける**．worktree を使っていれば消す．base に戻して最新にする．
-
-   ```bash
-   git switch <base> && git pull --ff-only
-   git worktree remove <worktree の path>
-   ```
-
-10. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
+    worktree を使っていない場合は，`git switch <base> && git pull --ff-only` だけを行う．
+12. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
 
 ## release PR
 
