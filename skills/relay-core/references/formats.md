@@ -28,7 +28,10 @@ relay-build は，次を全て満たす Issue にだけ着手する．
   | 調査 | 決め方と成果物 |
 
 - 大きさが S または M である．epic ではない．
-- open の依存（blocked by）がない．ただし `relay.yml` の `stack: true` で，依存先に open PR がある場合を除く．
+- open の依存（blocked by）がない．ただし `relay.yml` の `stack: true` で，次の両方を満たす場合を除く．
+  - 全ての open の依存先に open PR がある．
+  - それらの PR を全て含む branch が 1 つある（依存先が 1 つの場合，または 1 つの PR が他の全ての PR の上に stack している場合）．
+    依存先に別々の open PR が 2 つあり，どちらも他方を含まない場合は着手しない．
 - 他の Assignee，他の人の作業 branch，open PR がない．
 
 ## Issue の種類
@@ -112,6 +115,9 @@ PDF の生成を server で行うか，browser で行うか．
 ```
 
 時間の上限に達したら，途中の結果と，続けるかどうかの提案を comment に書いて止める．
+
+成果物が Issue の comment だけの場合は，PR を作らない．成果を comment に書いてから Issue を閉じる
+（`relay-build` の「成果が comment だけの調査」）．ADR など file の変更も成果物に含む場合は，通常どおり PR を作る．
 
 ### 大項目（epic）
 
