@@ -1,0 +1,5 @@
+# relay:start
+# Relay の skill の script を LF に保つ．CRLF になると bash で実行できない．
+.agents/skills/**/*.sh text eol=lf
+.claude/skills/**/*.sh text eol=lf
+# relay:end

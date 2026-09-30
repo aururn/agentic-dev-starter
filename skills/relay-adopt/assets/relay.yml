@@ -29,6 +29,8 @@ review:
   # auto，subagent，none，または command（{base} が使える）
   independent: auto
 
+# 種別と大きさの label 名．既存の label を使う場合は，その名前に書き換える（例：fix: "bug"）．
+# setup-labels.sh がこの block を読むので，1 行に 1 つの形で書く．
 labels:
   type:
     feat: "type:feat"
