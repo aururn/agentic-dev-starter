@@ -6,30 +6,36 @@ description: 利用者が merge を明示して依頼した PR を，merge の�
 # relay-land
 
 merge は承認が必要な操作である．利用者がこの PR の merge を明示して依頼した場合だけ使う．
+merge の依頼には，その PR の Draft 解除の依頼も含まれるものとして扱う．
 
 ## 先に読む
 
-- [../relay-core/SKILL.md](../relay-core/SKILL.md) と `.agents/relay.yml`（`merge`，`release`）
+- [../relay-core/SKILL.md](../relay-core/SKILL.md) と `.agents/relay.yml`（`base`，`merge`，`release`，`review`）
 
-## merge の前に確かめること
+## PR の種類を決める
+
+`relay.yml` の `release` があり，PR の head が `release.from`，base が `release.to` の場合は「release PR」の節に従う．
+それ以外は「通常の PR」の節に従う．
+
+## 通常の PR
+
+### merge の前に確かめること
 
 どれか 1 つでも満たさない場合は，merge せずに理由を報告する．直せるもの（本文の更新，CI の再実行）は直してから確かめ直す．
 
-| 確認                                             | 方法                                                              |
-| ------------------------------------------------ | ----------------------------------------------------------------- |
-| 今の head の CI が全て成功している               | `gh pr checks <PR>`                                               |
-| 今の head でレビューが済み，P0/P1 がない          | 最後の relay-review の報告の head と，今の head を比べる．下の注を参照 |
-| base の最新を取り込んでも衝突しない              | `gh pr view <PR> --json mergeable,mergeStateStatus`               |
-| 本文の「確認した head:」が今の head と一致する   | `gh pr view <PR> --json headRefOid,body`                          |
-| 閉じる Issue が 1 件で，その Issue が epic でない | 下の「閉じる Issue の取り方」                                     |
-| stack の場合，下の PR が先に merge されている    | PR の base が `relay.yml` の `base` であること                    |
+| 確認                                                | 方法                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| 今の head の CI が全て成功している                  | `gh pr checks <PR>`                                           |
+| 今の head でレビューが済み，P0/P1 がない             | 最後の relay-review の報告の head と，今の head を比べる      |
+| base の最新を取り込んでも衝突しない                 | `gh pr view <PR> --json mergeable,mergeStateStatus`           |
+| 本文の「確認した head:」が今の head と一致する      | `gh pr view <PR> --json headRefOid,body`                      |
+| 閉じる Issue が 1 件で，その Issue が open で epic でない | 下の「閉じる Issue の取り方」                           |
+| stack の場合，下の PR が先に merge されている       | PR の base が `relay.yml` の `base` であること                |
 
-レビューの後に push があった場合は，`relay-review` をやり直す．
-
-レビューは原則として独立レビューとする．ただし，`review.independent` が `none` の場合と，`auto` で別の agent を使えなかった場合は，
-今の head の自己レビューで足りる．その場合は，PR の「見てほしいところ」に自己レビューのみである理由が書かれていることを確かめる．
-
-確かめた時点の `headRefOid` を控えておく．手順 4 でこの SHA を指定し，確かめていない commit が merge されないようにする．
+- レビューは原則として独立レビューとする．`review.independent` が `none` の場合と，`auto` で別の agent を使えなかった場合は，
+  今の head の自己レビューで足りる．その場合は，PR の「見てほしいところ」に自己レビューのみである理由が書かれていることを確かめる．
+- レビューの後に push があった場合は，`relay-review` をやり直す．
+- 確かめた時点の `headRefOid` を **確認済み SHA** として控える．
 
 ### 閉じる Issue の取り方
 
@@ -37,97 +43,127 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
 
 - base が default branch の場合：`gh pr view <PR> --json closingIssuesReferences` の 1 件を使う．
 - base が default branch でない場合（例：`staging`）：`closingIssuesReferences` は空になる．PR 本文の `Closes #N` などの行から
-  番号を取り，その Issue が存在して open であることを `gh issue view` で確かめる．この場合，Issue は merge 後に手順 6 で閉じる．
+  番号を取り，`gh issue view` で存在と状態を確かめる．Issue は merge の後に手順 5 で閉じる．
 
-## 手順
+### 手順
 
-1. 上の表を確かめる．
-2. Draft であれば解除する．merge の依頼には Draft 解除の依頼も含まれるものとして扱う．
+1. **merge の前に確かめる**．上の表を確かめ，確認済み SHA を控える．
+2. **stack の上の PR を控える**．この PR の branch を base にしている open PR を探す．
+
+   ```bash
+   gh pr list --state open --base <この PR の branch> --json number,headRefName,headRefOid
+   ```
+
+   あれば，この PR の確認済み SHA を「下の PR の最後の commit」として控える．手順 6 で使う．
+3. **merge する**．Draft であれば解除し，`merge.method` で merge する．`--match-head-commit` に確認済み SHA を渡し，
+   確かめていない commit が merge されないようにする．head が変わって失敗した場合は，手順 1 からやり直す．
+   branch はここでは消さない（`--delete-branch` を付けない）．worktree の中から実行すると local の branch を消せずに失敗し，
+   stack の上の PR の付け替えも済んでいないため．
 
    ```bash
    gh pr ready <PR>
+   gh pr merge <PR> --<method> --match-head-commit <確認済み SHA>
    ```
 
-3. **stack の上の PR を確かめる**．この PR の branch を base にしている PR があれば，merge の後に手順 7 で付け替えるので，
-   手順 4 では `--delete-branch` を付けない．
-
-   ```bash
-   gh pr list --state open --base <この PR の branch> --json number,headRefName
-   ```
-
-4. `merge.method` で merge する．`--match-head-commit` に手順 1 で控えた SHA を渡す．head が変わっていて失敗した場合は，手順 1 からやり直す．
-
-   ```bash
-   gh pr merge <PR> --<method> --delete-branch --match-head-commit <控えた SHA>
-   ```
-
-5. **merge が完了したか確かめる**．merge queue や auto-merge の repository では，`gh pr merge` が成功しても queue に入っただけの
-   場合がある．`state` が `MERGED` になるまで，手順 6 以降に進まない．
+4. **merge が完了したか確かめる**．merge queue や auto-merge の repository では，`gh pr merge` が成功しても queue に入っただけの
+   場合がある．`state` が `MERGED` になるまで次に進まない．
 
    ```bash
    gh pr view <PR> --json state,mergedAt,mergeCommit
    ```
 
    queue に入っただけの場合は，バトンの「止まっている理由」に「merge queue の完了待ち」と書いて報告し，ここで止める．
-   後で `relay-land <PR>` をもう一度実行したときは，merge 済みであれば手順 6 から再開する．
-6. **Issue が閉じたか確かめる**．自動で閉じないことがあるため，必ず読み直す．閉じていなければ，PR を示す comment を付けて閉じる．
+   後で `relay-land <PR>` をもう一度実行したときは，merge 済みであれば手順 5 から再開する．
+5. **Issue が閉じたか確かめる**．自動で閉じないことがあるため，必ず読み直す．閉じていなければ，PR を示す comment を付けて閉じる．
 
    ```bash
    gh issue view <番号> --json state
    gh issue close <番号> --comment "#<PR> で対応した．"
    ```
 
-7. **stack の上の PR を付け替える**．手順 3 で見つけた PR ごとに行う．
-   - `merge.method` が `merge` の場合：base を `relay.yml` の `base` に変えるだけでよい．
-   - `squash` または `rebase` の場合：下の PR の commit が新しい base の祖先にならないため，base を変えるだけでは上の PR の差分に
-     下の PR の変更が残る．上の PR に固有の commit だけを新しい base に載せ直す．これは履歴の書き換えなので，push の前に利用者の承認をもらう．
+6. **stack の上の PR を付け替える**．手順 2 で見つけた PR ごとに，base を `relay.yml` の `base` に変える．
 
    ```bash
    gh pr edit <上の PR> --base <base>
-   git fetch origin
-   git rebase --onto origin/<base> <下の PR の最後の commit> <上の PR の branch>
-   git push --force-with-lease=<上の PR の branch>:<rebase 前の上の PR の head> origin <上の PR の branch>   # 承認後
    ```
 
-   付け替えが済んだら，merge した branch を消す（`git push origin --delete <branch>`）．
-8. **バトンを `完了` にし，状態 label を外す**．
-9. **止めていた Issue を解除する**．この Issue が止めていた Issue ごとに，open の依存が残っていなければ，
+   `merge.method` が `merge` の場合はこれで終わる．`squash` または `rebase` の場合は，下の PR の commit が新しい base の祖先に
+   ならないため，上の PR の差分に下の PR の変更が残る．上の PR に固有の commit だけを新しい base に載せ直す．
+   履歴の書き換えなので，push の前に利用者の承認をもらう．
+
+   ```bash
+   upper_head=$(gh pr view <上の PR> --json headRefOid --jq .headRefOid)
+   git fetch origin <base> <上の PR の branch>
+   # local に上の PR の branch があり，upper_head と違う場合（push していない commit がある場合など）は止まって報告する
+   git switch -C <上の PR の branch> "$upper_head"
+   git rebase --onto origin/<base> <下の PR の最後の commit>
+   git push --force-with-lease=<上の PR の branch>:"$upper_head" origin <上の PR の branch>   # 承認後
+   ```
+
+   `upper_head` を，載せ直しの起点と `--force-with-lease` の両方に使う．remote にだけある commit を失わないため．
+7. **バトンを `完了` にし，状態 label を外す**．
+8. **止めていた Issue を解除する**．この Issue が止めていた Issue ごとに，open の依存が残っていなければ，
    状態 label を `relay:blocked` から `relay:ready` にする．バトンがあれば `準備済み` にする．
 
    ```bash
    gh api "repos/$repo/issues/<番号>/dependencies/blocking" --jq '.[] | select(.state=="open") | .number'
    ```
 
-10. **epic を確かめる**．親の epic の sub-issue が全て閉じていれば，epic の「完了の姿」を確かめ，close するかを利用者に聞く．
-11. **手元を片付ける**．Issue 用の worktree で作業していた場合，その worktree の中からは base を checkout できない
-    （base は元の作業場所で checkout されている）．次の順で行う．
+9. **epic を確かめる**．親の epic の sub-issue が全て閉じていれば，epic の「完了の姿」を確かめ，close するかを利用者に聞く．
+10. **手元と branch を片付ける**．Issue 用の worktree の中からは base を checkout できない（元の作業場所で checkout されている）．
+    次の順で，元の作業場所から行う．
 
     ```bash
-    git worktree list                      # 1 行目が元の作業場所
+    git worktree list                             # 1 行目が元の作業場所
     cd <元の作業場所>
-    git worktree remove <Issue 用の worktree の path>
+    git worktree remove <Issue 用の worktree>     # worktree を使った場合だけ
     git switch <base> && git pull --ff-only
+    git branch -D <merge した branch>
+    git push origin --delete <merge した branch>  # repository の設定で自動削除される場合は不要
     ```
 
-    worktree を使っていない場合は，`git switch <base> && git pull --ff-only` だけを行う．
-12. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
+11. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
 
 ## release PR
 
-`relay.yml` の `release` がある場合，`from` から `to` への PR は release PR として扱う．release PR には，上の手順のうち
-1，2，4，5，12 だけを使う．`from` の branch は merge の後も使い続けるので，次のことを必ず守る．
+`release.from` の branch（例：`staging`）は merge の後も使い続ける．通常の PR の手順のうち，Issue，バトン，stack，
+branch の削除に関わるものは行わない．
 
-- `gh pr merge` に `--delete-branch` を付けない．`from` の branch を削除しない．
-- stack の付け替え（手順 3，7），Issue の close（手順 6），バトンと依存の更新（手順 8，9）を行わない．
-- 含まれる PR を `gh pr list --state merged --base <from>` と差分から集め，一覧と移行手順を本文に書く．
-- `relay:release` label を付ける．Issue は閉じない．
-- merge は通常の PR と同じく，利用者の明示の依頼がある場合だけ行う．
+### merge の前に確かめること
 
-```bash
-gh pr merge <PR> --<method> --match-head-commit <控えた SHA>
-```
+| 確認                                           | 方法                                                            |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| 今の head の CI が全て成功している             | `gh pr checks <PR>`                                             |
+| base の最新を取り込んでも衝突しない            | `gh pr view <PR> --json mergeable,mergeStateStatus`             |
+| `relay:release` label が付いている             | `gh pr view <PR> --json labels`                                 |
+| 本文の「含まれる PR」が今の差分と一致する      | 下の手順 1                                                      |
+
+「閉じる Issue」と「確認した head:」は確かめない．release PR は Issue を閉じず，`relay-pr-policy` も検査しないため．
+確かめた時点の `headRefOid` を確認済み SHA として控える．
+
+### 手順
+
+1. **本文を今の差分に合わせる**．`release.to` にまだない commit から，含まれる PR を集める．本文の「含まれる PR」と「移行手順」を
+   その結果で更新する．
+
+   ```bash
+   git fetch origin <from> <to>
+   git log --first-parent --format='%h %s' origin/<to>..origin/<from>
+   gh pr list --state merged --base <from> --limit 100 --json number,title,mergedAt
+   ```
+
+2. **merge する**．`--delete-branch` は付けない．
+
+   ```bash
+   gh pr ready <PR>
+   gh pr merge <PR> --<method> --match-head-commit <確認済み SHA>
+   ```
+
+3. **merge が完了したか確かめる**．通常の PR の手順 4 と同じ．
+4. **報告する**．merge した commit，含まれた PR，移行手順を示す．
 
 ## してはいけないこと
 
 - 利用者の明示の依頼なしに merge すること．「進めて」は merge の依頼に含めない．
 - 確認に失敗した状態で，required check を迂回して merge すること（`--admin` を使わない）．
+- `release.from` の branch を削除すること．
