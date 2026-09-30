@@ -11,10 +11,6 @@
 
 </div>
 
-> [!NOTE]
-> オリジナル（正本）は [aururn/agentic-dev-starter](https://github.com/aururn/agentic-dev-starter) です．
-> 他の場所にある repository は，この正本の複製です．更新と Issue は正本で扱います．
-
 依頼を Issue に分け，Issue ごとに実装，Draft PR，別の agent によるレビュー，merge の後片付けまでを進めます．
 作業の状態は会話ではなく GitHub に残るので，session が替わっても，Codex から Claude Code に替わっても，同じところから続けられます．
 
