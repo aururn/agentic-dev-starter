@@ -110,7 +110,11 @@ ADR など file の変更も成果物に含む場合は，この節を使わず�
    gh issue edit <番号> --remove-label relay:working
    ```
 
-4. **報告する**．成果の comment の URL と結論を示す．結論から新しい Issue が必要な場合は，候補として示す．
+4. **止めていた Issue を解除する**．PR がないため `relay-land` は実行されない．`relay-land` の手順 8 と同じく，
+   この Issue が止めていた `relay:blocked` の Issue のうち，open の依存が残っていないものを `relay:ready` にし，
+   バトンがあれば `準備済み` にする．
+5. **報告する**．成果の comment の URL と結論，着手できるようになった Issue を示す．結論から新しい Issue が必要な場合は，
+   候補として示す．
 
 ## してはいけないこと
 
