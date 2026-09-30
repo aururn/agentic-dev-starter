@@ -160,12 +160,6 @@ scripts/ tests/     この pack 自身の検査
 
 </details>
 
-## <img src="docs/assets/emoji/folded-hands.svg" width="26" height="26" alt=""> 参考にしたもの
-
-Issue を実装前の約束，PR を実装後の記録として分ける考え方は，
-[ReoHakase/enterprise-agentic-saas-starter](https://github.com/ReoHakase/enterprise-agentic-saas-starter) の運用を参考にしました．
-文書と skill の本文，書式，仕組みはこの repository で独自に書いたものです．
-
 ## <img src="docs/assets/emoji/page-facing-up.svg" width="26" height="26" alt=""> License
 
 [Apache License 2.0](LICENSE)
