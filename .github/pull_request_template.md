@@ -1,3 +1,5 @@
+<!-- Derived from .github/pull_request_template.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 ## 概要
 
 <!-- 何が変わるかを 1〜3 行で書く．対応する Issue を正確に 1 件だけ閉じる -->

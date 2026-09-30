@@ -1,3 +1,5 @@
+<!-- Derived from .github/ISSUE_TEMPLATE/work.yml in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 ### ゴール
 
 <!-- 完了したら何ができるようになるかを 1〜2 文で書く -->

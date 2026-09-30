@@ -1,3 +1,4 @@
+# Derived from .github/ISSUE_TEMPLATE/bug.yml in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed.
 name: 不具合
 description: 再現できる不具合と，修正後の要求振る舞い
 title: ""

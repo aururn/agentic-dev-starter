@@ -1,3 +1,5 @@
+<!-- Derived from docs/decisions/README.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # ADR
 
 長期的な設計判断を，理由，代替案，強制方法とともに残す．

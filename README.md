@@ -90,4 +90,12 @@ bash scripts/sync-skills.sh
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE) で公開しています．帰属情報は [NOTICE](NOTICE) にあります．
+
+このリポジトリの一部の文書とテンプレートは，
+[Enterprise Agentic SaaS Starter](https://github.com/ReoHakase/enterprise-agentic-saas-starter)
+（Copyright 2026 白田連大 (Reo Hakuta)，Apache License 2.0）を翻訳，再構成，変更したものです．
+該当する file には，先頭に由来と変更を示す注記があります．
+
+このテンプレートから作ったリポジトリでも，`LICENSE` と `NOTICE` を残し，注記を消さないでください．
+自分で書いた部分に別の license を使う場合も，上の file は Apache License 2.0 の条件に従います．

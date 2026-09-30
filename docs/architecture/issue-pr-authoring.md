@@ -7,6 +7,8 @@ applies_to:
   - .agents/skills/**
 ---
 
+<!-- Derived from docs/architecture/issue-pr-authoring.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # Issue と Pull Request の執筆契約
 
 ## 目的

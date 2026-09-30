@@ -3,6 +3,8 @@ title: テスト方針
 status: accepted
 ---
 
+<!-- Derived from docs/architecture/issue-pr-authoring.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # テスト方針
 
 この文書は技術スタックに依存しない最小の方針である．スタックを決めたら，層ごとの具体的な command と

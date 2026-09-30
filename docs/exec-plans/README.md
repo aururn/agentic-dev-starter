@@ -1,3 +1,5 @@
+<!-- Derived from docs/exec-plans/README.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # exec plan
 
 複数の PR や session にまたがる作業の計画，進捗，判断を記録する．1 つの Issue で完結する作業では作らない．

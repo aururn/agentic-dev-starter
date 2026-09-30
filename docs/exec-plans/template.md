@@ -6,6 +6,8 @@ created: YYYY-MM-DD
 epic: "#N"
 ---
 
+<!-- Derived from docs/exec-plans/template.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # 計画名
 
 ## 目的

@@ -1,3 +1,5 @@
+<!-- Derived from AGENTS.md in Enterprise Agentic SaaS Starter (https://github.com/ReoHakase/enterprise-agentic-saas-starter), Copyright 2026 Reo Hakuta, Apache-2.0. Modified by aururn: translated, restructured, and changed. -->
+
 # Agent Instructions
 
 この文書は Codex，Claude Code など全ての coding agent に共通する契約である．
