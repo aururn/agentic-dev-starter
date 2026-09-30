@@ -22,7 +22,7 @@
 
 人が判断するのは 👤 の 2 か所だけです．途中で止めるとき，再開するとき，担当を替えるときは `relay-handoff` を使います．
 
-## <img src="docs/assets/emoji/high-voltage.svg" width="26" height="26" alt=""> 使い始める
+## <img src="docs/assets/emoji/high-voltage.svg" width="26" height="26" align="absmiddle" alt=""> 使い始める
 
 ```bash
 # 1. repository の root で skill を入れる（Codex と Claude Code の両方に入る）
@@ -35,13 +35,13 @@ npx skills add aururn/agentic-dev-starter --skill '*' -a codex -a claude-code
 既存の repository にも入れられます．`relay-adopt` は既存の file を上書きせず，違いがあれば提案だけにします．
 更新は `npx skills update` で取り込めます．
 
-## <img src="docs/assets/emoji/puzzle-piece.svg" width="26" height="26" alt=""> 3 つの仕組み
+## <img src="docs/assets/emoji/puzzle-piece.svg" width="26" height="26" align="absmiddle" alt=""> 3 つの仕組み
 
 <table>
 <tr>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/handshake.svg" width="26" height="26" alt=""> バトン
+### <img src="docs/assets/emoji/handshake.svg" width="26" height="26" align="absmiddle" alt=""> バトン
 
 Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR，次の一手を置きます．
 次の session はこれを読むだけで再開できます．
@@ -49,7 +49,7 @@ Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR
 </td>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/gear.svg" width="26" height="26" alt=""> 運用設定
+### <img src="docs/assets/emoji/gear.svg" width="26" height="26" align="absmiddle" alt=""> 運用設定
 
 base branch，branch 名，PR title，検査の command，レビューの方法は `.agents/relay.yml` に書きます．
 skill はどの repository でも同じです．
@@ -57,7 +57,7 @@ skill はどの repository でも同じです．
 </td>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/check-mark-button.svg" width="26" height="26" alt=""> 確かめた証拠
+### <img src="docs/assets/emoji/check-mark-button.svg" width="26" height="26" align="absmiddle" alt=""> 確かめた証拠
 
 PR には，結果を得た commit（`確認した head:`）と結果を書きます．
 CI が今の head と照らし，古い結果のままの merge を止めます．
@@ -66,7 +66,7 @@ CI が今の head と照らし，古い結果のままの merge を止めます�
 </tr>
 </table>
 
-## <img src="docs/assets/emoji/memo.svg" width="26" height="26" alt=""> Issue と PR の書き方
+## <img src="docs/assets/emoji/memo.svg" width="26" height="26" align="absmiddle" alt=""> Issue と PR の書き方
 
 Issue の要求は，文章ではなく **例の表** で書きます．境界と例外が見やすく，そのまま test の case になります．
 
@@ -79,7 +79,7 @@ Issue の要求は，文章ではなく **例の表** で書きます．境界�
 PR は **変わること，見てほしいところ，Issue からの変更，確かめたこと，戻し方** の 5 節だけです．
 詳しい規則は [formats.md](skills/relay-core/references/formats.md) にあります．
 
-## <img src="docs/assets/emoji/keyboard.svg" width="26" height="26" alt=""> コマンド
+## <img src="docs/assets/emoji/keyboard.svg" width="26" height="26" align="absmiddle" alt=""> コマンド
 
 | やりたいこと | Codex | Claude Code |
 | --- | --- | --- |
@@ -90,7 +90,7 @@ PR は **変わること，見てほしいところ，Issue からの変更，�
 | merge して後片付けをする | `$relay-land 34` | `/relay-land 34` |
 | 中断，再開，交代 | `$relay-handoff` | `/relay-handoff` |
 
-## <img src="docs/assets/emoji/books.svg" width="26" height="26" alt=""> 詳しく
+## <img src="docs/assets/emoji/books.svg" width="26" height="26" align="absmiddle" alt=""> 詳しく
 
 <details>
 <summary><b>運用設定の例</b>（<code>.agents/relay.yml</code>）</summary>
@@ -160,7 +160,7 @@ scripts/ tests/     この pack 自身の検査
 
 </details>
 
-## <img src="docs/assets/emoji/page-facing-up.svg" width="26" height="26" alt=""> License
+## <img src="docs/assets/emoji/page-facing-up.svg" width="26" height="26" align="absmiddle" alt=""> License
 
 [Apache License 2.0](LICENSE)
 
