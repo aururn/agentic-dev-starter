@@ -1,9 +1,9 @@
-# Relay
+# agentic-dev-starter
 
 [![CI](https://github.com/aururn/agentic-dev-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/aururn/agentic-dev-starter/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/aururn/agentic-dev-starter)](LICENSE)
 
-**Relay** は，Issue を単位に，人と coding agent（Codex / Claude Code）が GitHub 上で作業を引き継ぐための skill pack です．
+Issue を単位に，人と coding agent（Codex / Claude Code）が GitHub 上で作業を引き継ぐための skill pack です．
 
 依頼を sub-issue に分け，Issue ごとに実装，Draft PR，別の agent によるレビュー，merge の後片付けまでを agent が進めます．
 人が判断するのは，分解案の承認と merge の依頼の 2 か所だけです．
@@ -43,4 +43,4 @@ npx skills add aururn/agentic-dev-starter --skill '*' -a codex -a claude-code
 
 ## License
 
-[Apache License 2.0](LICENSE) で公開しています．
+[Apache License 2.0](LICENSE)
