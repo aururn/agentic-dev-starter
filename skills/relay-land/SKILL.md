@@ -40,10 +40,17 @@ merge の依頼には，その PR の Draft 解除の依頼も含まれるもの
 ### 閉じる Issue の取り方
 
 GitHub は，PR の base が default branch の場合だけ `Closes #N` を closing link として扱う．
+base が default branch でも，closing link が作られないことがある．
 
-- base が default branch の場合：`gh pr view <PR> --json closingIssuesReferences` の 1 件を使う．
-- base が default branch でない場合（例：`staging`）：`closingIssuesReferences` は空になる．PR 本文の `Closes #N` などの行から
-  番号を取り，`gh issue view` で存在と状態を確かめる．Issue は merge の後に手順 5 で閉じる．
+- `gh pr view <PR> --json closingIssuesReferences` が 1 件の場合：その Issue を使う．
+- 空の場合（base が default branch でない場合，例：`staging`，または closing link が作られなかった場合）：
+  PR 本文の `Closes #N` などの closing keyword から番号を取り，`gh issue view` で存在と状態を確かめる．
+  Issue は GitHub が自動で閉じないため，merge の後に手順 5 で閉じる．
+
+  ```bash
+  gh pr view <PR> --json body --jq '[.body | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") | scan("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#([0-9]+)"; "i") | .[3]] | unique | .[]'
+  gh issue view <番号> --json number,state,labels,title
+  ```
 
 ### 手順
 
@@ -51,7 +58,7 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
 2. **stack の上の PR を控える**．この PR の branch を base にしている open PR を探す．
 
    ```bash
-   gh pr list --state open --base <この PR の branch> --json number,headRefName,headRefOid
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=open -f base=<この PR の branch> -f per_page=100 --jq '.[] | [.number, .head.ref, .head.sha] | @tsv'
    ```
 
    あれば，この PR の確認済み SHA を「下の PR の最後の commit」として控える．手順 6 で使う．
@@ -107,7 +114,7 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
    `relay:working` と `relay:review` の Issue（stack で先に進めている Issue）は，状態もバトンも変えない．
 
    ```bash
-   gh api "repos/$repo/issues/<番号>/dependencies/blocking" --jq '.[] | select(.state=="open") | .number'
+   gh api --paginate "repos/$repo/issues/<番号>/dependencies/blocking" --jq '.[] | select(.state=="open") | .number'
    ```
 
 9. **epic を確かめる**．親の epic の sub-issue が全て閉じていれば，epic の「完了の姿」を確かめ，close するかを利用者に聞く．
@@ -165,7 +172,7 @@ branch の削除に関わるものは行わない．
    ```bash
    git fetch origin <from> <to>
    git log --first-parent --format='%h %s' origin/<to>..origin/<from>
-   gh pr list --state merged --base <from> --limit 100 --json number,title,mergedAt
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=closed -f base=<from> -f per_page=100 --jq '.[] | select(.merged_at) | [.number, .title, .merged_at] | @tsv'
    ```
 
 2. **merge する**．`merge.method` に関わらず merge commit（`--merge`）を使う．squash や rebase では `from` の commit が

@@ -20,9 +20,16 @@ description: GitHub Issue を 1 件実装し，作業 branch，commit，push，D
    ```bash
    gh issue view <番号> --json number,title,body,labels,assignees,state
    gh issue develop --list <番号>
-   gh pr list --state open --search "<番号> in:body" --json number,headRefName,isDraft
-   gh api "repos/$repo/issues/<番号>/dependencies/blocked_by" --jq '.[] | [.number, .state] | @tsv'
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=open -f per_page=100 --jq '.[] | select((.body // "") | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") |
+     test("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#<番号>($|[^0-9])"; "i")) |
+     [.number, .head.ref, .draft] | @tsv'
+   gh api --paginate "repos/$repo/issues/<番号>/dependencies/blocked_by" --jq '.[] | [.number, .state] | @tsv'
    ```
+
+   対応する open PR は，本文に closing keyword（`Closes` など）とこの番号がある PR だけとする．
+   「関連：#N」のように番号があるだけの PR は数えない．
+   依存の API が失敗した場合は，`github.md` のとおり本文の `依存：#N` から番号を取り，各 Issue の状態を読む．
+   open の Issue があれば，open の依存として手順 2 で扱う．
 
    バトンがあれば読む（`relay-core/references/baton.md`）．`中断` のバトンがある場合は，`relay-handoff` の再開の手順に従う．
 2. **着手できるか判断する**．`formats.md` の[着手の条件](../relay-core/references/formats.md#着手の条件)を満たさない場合は，
