@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { closingRefs, evaluate, inputFromEvent } from "../skills/relay-adopt/assets/github/scripts/relay-pr-policy.mjs";
+import { closingRefs, evaluate, inputFromEvent, verifiedSection } from "../skills/relay-adopt/assets/github/scripts/relay-pr-policy.mjs";
 
 const HEAD_SHA = "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678";
 const body = (lines) => lines.join("\n");
@@ -29,6 +29,27 @@ describe("closingRefs", () => {
 
   test("参照だけの #N は数えない", () => {
     assert.deepEqual(closingRefs("関連：#3，#4 を参照"), []);
+  });
+
+  test("inline code の中の記法は数えない", () => {
+    const text = body(["Closes #12", "", "例：`Closes #13` と書く．``Fixes #14`` も同じ．"]);
+    assert.deepEqual(closingRefs(text, "me/app"), ["me/app#12"]);
+  });
+
+  test("改行が CRLF の本文でも code block の中の記法は数えない", () => {
+    const text = ["Closes #1", "```", "Closes #2", "```"].join("\r\n");
+    assert.deepEqual(closingRefs(text), ["#1"]);
+  });
+});
+
+describe("verifiedSection", () => {
+  test("「確かめたこと」の節だけを，次の同じ深さの見出しの手前まで返す", () => {
+    const text = body(["## 変わること", "a", "## 確かめたこと", "b", "### 詳細", "c", "## 戻し方", "d"]);
+    assert.equal(verifiedSection(text), body(["b", "### 詳細", "c"]));
+  });
+
+  test("節がなければ null を返す", () => {
+    assert.equal(verifiedSection(body(["## 変わること", "a"])), null);
   });
 });
 
@@ -62,6 +83,33 @@ describe("evaluate", () => {
   test("❌ の行が残る PR は Draft 解除後に失敗する", () => {
     const result = run({ body: `${valid}\n| ❌ | npm test | 1 件失敗 |` });
     assert.equal(result.errors.length, 1);
+  });
+
+  test("本文に Closes #12 と，inline code の Closes #13 がある PR は閉じる Issue を 1 件と数えて通る", () => {
+    const result = run({ body: `${valid}\n\n\`Closes #13\` のようには書かない．` });
+    assert.deepEqual(result.errors, []);
+  });
+
+  test("「変わること」に ❌ の表があり，確かめたことが全て ✅ の PR は Draft 解除後も通る", () => {
+    const changes = body(["## 変わること", "", "| 状態 | 表示 |", "| --- | --- |", "| ❌ | 失敗 |", ""]);
+    const result = run({ body: valid.replace("## 確かめたこと", `${changes}\n## 確かめたこと`), isDraft: false });
+    assert.deepEqual(result, { errors: [], warnings: [], skipped: false });
+  });
+
+  test("❌ の行が「確かめたこと」の後の節にあっても，確かめたことが全て ✅ なら通る", () => {
+    const result = run({ body: `${valid}\n\n## 戻し方\n\n| ❌ | 旧版 |` });
+    assert.deepEqual(result.errors, []);
+  });
+
+  test("「確かめたこと」の節がない PR は本文全体の ❌ を見る", () => {
+    const result = run({ body: valid.replace("## 確かめたこと", "## 結果").replace("| ✅ |", "| ❌ |") });
+    assert.equal(result.errors.length, 1);
+  });
+
+  test("改行が CRLF の本文も LF と同じに検査する", () => {
+    assert.deepEqual(run({ body: valid.replaceAll("\n", "\r\n") }), { errors: [], warnings: [], skipped: false });
+    const failed = `${valid}\n| ❌ | npm test | 1 件失敗 |`.replaceAll("\n", "\r\n");
+    assert.equal(run({ body: failed }).errors.length, 1);
   });
 
   test("relay:release の PR は検査しない", () => {

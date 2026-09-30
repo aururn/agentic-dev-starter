@@ -1,6 +1,5 @@
 name: 調査
 description: 決めるための調査．成果はコードではなく判断
-title: ""
 body:
   - type: textarea
     id: question

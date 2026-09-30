@@ -1,6 +1,5 @@
 name: 作業
 description: 機能の追加，改善，文書，設定．1 つの PR で終わる大きさにする
-title: ""
 body:
   - type: markdown
     attributes:

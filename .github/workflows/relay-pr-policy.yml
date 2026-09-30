@@ -23,5 +23,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+          # lockfile がない repository でも止まらないように，自動の cache を切る
+          package-manager-cache: false
       - name: PR 本文を検査する
         run: node .github/scripts/relay-pr-policy.mjs

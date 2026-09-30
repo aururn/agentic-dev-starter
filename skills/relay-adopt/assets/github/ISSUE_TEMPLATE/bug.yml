@@ -1,6 +1,5 @@
 name: 不具合
 description: 期待と違う動作の修正
-title: ""
 body:
   - type: markdown
     attributes:

@@ -7,10 +7,37 @@ const CLOSING =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:(?:https:\/\/github\.com\/)?([\w.-]+\/[\w.-]+)(?:#|\/issues\/)|#)(\d+)\b/gi;
 const HEAD = /(?:確認した\s*head|verified\s+head)\s*[:：]\s*`?([0-9a-f]{7,40})`?/i;
 const FAILED_ROW = /^\s*\|\s*❌/m;
+const HEADING = /^(#{1,6})[ \t]+(.*?)[ \t#]*$/;
+const VERIFIED_SECTION = /^(?:確かめたこと|verification)$/i;
 
-/** HTML comment と fenced code block を除く．例や説明の中の記法を検査しないため． */
+/** 改行を LF にそろえ，HTML comment と fenced code block を除く．例や説明の中の記法を検査しないため． */
 export function stripNonContent(body) {
-  return body.replace(/<!--[\s\S]*?-->/g, "").replace(/^(```|~~~)[\s\S]*?^\1/gm, "");
+  return body
+    .replace(/\r\n?/g, "\n")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/^(```|~~~)[\s\S]*?^\1/gm, "");
+}
+
+/** inline code を除く．GitHub は inline code の中の closing keyword で Issue を閉じないため． */
+export function stripInlineCode(text) {
+  return text.replace(/(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, "");
+}
+
+/**
+ * 「確かめたこと」の節の本文を返す．節は次の同じ深さ以上の見出しの手前で終わる．
+ * 節がない場合は null を返す．
+ */
+export function verifiedSection(text) {
+  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  const start = lines.findIndex((line) => VERIFIED_SECTION.test(line.match(HEADING)?.[2] ?? ""));
+  if (start === -1) return null;
+  const level = lines[start].match(HEADING)[1].length;
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => {
+    const h = line.match(HEADING);
+    return h && h[1].length <= level;
+  });
+  return (end === -1 ? rest : rest.slice(0, end)).join("\n");
 }
 
 /**
@@ -19,7 +46,7 @@ export function stripNonContent(body) {
  */
 export function closingRefs(body, repo = "") {
   const refs = new Set();
-  for (const m of stripNonContent(body).matchAll(CLOSING)) {
+  for (const m of stripInlineCode(stripNonContent(body)).matchAll(CLOSING)) {
     refs.add(`${(m[1] ?? repo).toLowerCase()}#${m[2]}`);
   }
   return [...refs];
@@ -56,7 +83,9 @@ export function evaluate({ body, headSha, isDraft, labels, repo = "" }) {
     );
   }
 
-  if (FAILED_ROW.test(text)) {
+  // 「確かめたこと」の節だけを見る．他の節の ❌ は，例えば仕様の表の値であり，確認の結果ではないため．
+  // 節がない場合は本文全体を見る．節の見出しを消して検査を避けられないようにするため．
+  if (FAILED_ROW.test(verifiedSection(text) ?? text)) {
     strict(
       "確かめたことに ❌ が残っている．直して確かめ直す．直さない場合は，その判断を「見てほしいところ」に書き，行を ⏭ にする．",
     );
