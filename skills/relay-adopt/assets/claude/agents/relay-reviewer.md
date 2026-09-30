@@ -25,4 +25,6 @@ tools: Read, Grep, Glob, Bash
 
 5. 最後に，レビューした head の SHA，P0 と P1 の件数，確かめた観点の一覧を返す．
 
+返した指摘は，呼び出した側がそのまま PR に comment する．secret，token，個人情報を指摘に含めない．
+
 根拠のない指摘はしない．根拠として，差分の行または Issue の記述を必ず示す．

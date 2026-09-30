@@ -62,7 +62,7 @@ checks:
   full: ["pnpm lint", "pnpm test", "pnpm build"]
   gated: ["pnpm test:e2e:live"]   # 承認がないと実行しない
 review:
-  independent: auto               # Claude Code で作ったら Codex で，Codex で作ったら Claude Code でレビュー
+  independent: auto               # PR に @codex review と comment して GitHub 上でレビューを受ける
 release: { from: staging, to: main }
 ```
 
@@ -96,12 +96,13 @@ branch protection の required check に `relay-pr-policy` を足すと，古い
 
 agent は次の操作を，利用者が明示して依頼した場合だけ行います．
 
-- PR の Draft 解除，merge，レビュー依頼，approve
+- PR の Draft 解除，merge，人へのレビュー依頼，approve
 - force push，公開済みの履歴の書き換え
 - `checks.gated` の検査（有料の API，外部サービス，本番環境）
 - 本番配備，外部サービスの設定変更，secret の変更
 
-branch の作成，commit，作業 branch への push，Draft PR，label，バトンの更新は，Issue 単位の依頼に含まれるものとして進めます．
+branch の作成，commit，作業 branch への push，Draft PR，`@codex review` とレビューの結果の comment，label，バトンの更新は，
+Issue 単位の依頼に含まれるものとして進めます．
 
 ## 構成
 

@@ -25,8 +25,9 @@ coding agent に Issue 単位で作業を任せると，次のことが起きる
   そのまま test の case になる．
 - **PR は 5 節だけにする．** 変わること，見てほしいところ，Issue からの変更，確かめたこと，戻し方．
   レビューする人は「見てほしいところ」から読み始められる．
-- **独立レビューは別の agent を優先する．** Claude Code で実装したら Codex で，Codex で実装したら Claude Code で
-  レビューする．同じ model の思い込みを持ち込まないため．
+- **独立レビューは GitHub 上で受ける．** PR に `@codex review` と comment し，Codex の GitHub 連携のレビューを受ける．
+  使えない場合は手元の別の agent でレビューし，結果を PR に comment する．指摘と対応が PR に残るので，
+  利用者は PR を見るだけで経過が分かる．
 - **merge の後まで面倒を見る．** Issue が閉じたかの確認，止めていた Issue の解除，stack の付け替え，worktree の片付け．
 
 ## 段階と承認
