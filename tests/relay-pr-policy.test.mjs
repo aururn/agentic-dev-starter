@@ -10,11 +10,16 @@ const run = (overrides) => evaluate({ body: valid, headSha: HEAD_SHA, isDraft: f
 describe("closingRefs", () => {
   test("GitHub が認める closing keyword を全て数える", () => {
     const text = body(["Closes #1", "fixes #2", "Resolved: #3", "close owner/repo#4", "Fix https://github.com/o/r/issues/5"]);
-    assert.deepEqual(closingRefs(text), ["#1", "#2", "#3", "owner/repo#4", "o/r#5"]);
+    assert.deepEqual(closingRefs(text, "me/app"), ["me/app#1", "me/app#2", "me/app#3", "owner/repo#4", "o/r#5"]);
   });
 
   test("同じ Issue を 2 回書いても 1 件と数える", () => {
-    assert.deepEqual(closingRefs("Closes #1\nFixes #1"), ["#1"]);
+    assert.deepEqual(closingRefs(body(["Closes #1", "Fixes #1"])), ["#1"]);
+  });
+
+  test("同じ Issue を短い形と完全な形で書いても 1 件と数える", () => {
+    const text = body(["Closes #12", "Fixes https://github.com/Me/App/issues/12"]);
+    assert.deepEqual(closingRefs(text, "me/app"), ["me/app#12"]);
   });
 
   test("comment と code block の中の記法は数えない", () => {
@@ -72,8 +77,17 @@ describe("evaluate", () => {
 
 describe("inputFromEvent", () => {
   test("PR の event から本文，head，Draft，label を取り出す", () => {
-    const event = { pull_request: { body: "Closes #1", head: { sha: HEAD_SHA }, draft: true, labels: [{ name: "relay:review" }] } };
-    assert.deepEqual(inputFromEvent(event), { body: "Closes #1", headSha: HEAD_SHA, isDraft: true, labels: ["relay:review"] });
+    const event = {
+      repository: { full_name: "me/app" },
+      pull_request: { body: "Closes #1", head: { sha: HEAD_SHA }, draft: true, labels: [{ name: "relay:review" }] },
+    };
+    assert.deepEqual(inputFromEvent(event), {
+      body: "Closes #1",
+      headSha: HEAD_SHA,
+      isDraft: true,
+      labels: ["relay:review"],
+      repo: "me/app",
+    });
   });
 
   test("merge queue の event では検査の入力を作らない", () => {

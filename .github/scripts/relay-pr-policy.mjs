@@ -13,20 +13,23 @@ export function stripNonContent(body) {
   return body.replace(/<!--[\s\S]*?-->/g, "").replace(/^(```|~~~)[\s\S]*?^\1/gm, "");
 }
 
-/** 本文が閉じる Issue を `owner/repo#N` または `#N` の形で重複なく返す． */
-export function closingRefs(body) {
+/**
+ * 本文が閉じる Issue を `owner/repo#N` の形で重複なく返す．
+ * `#N` は `repo`（PR の repository）の Issue として数える．同じ Issue を短い形と完全な形で書いても 1 件にするため．
+ */
+export function closingRefs(body, repo = "") {
   const refs = new Set();
   for (const m of stripNonContent(body).matchAll(CLOSING)) {
-    refs.add(`${m[1] ? m[1].toLowerCase() : ""}#${m[2]}`);
+    refs.add(`${(m[1] ?? repo).toLowerCase()}#${m[2]}`);
   }
   return [...refs];
 }
 
 /**
- * @param {{ body: string, headSha: string, isDraft: boolean, labels: string[] }} pr
+ * @param {{ body: string, headSha: string, isDraft: boolean, labels: string[], repo?: string }} pr
  * @returns {{ errors: string[], warnings: string[], skipped: boolean }}
  */
-export function evaluate({ body, headSha, isDraft, labels }) {
+export function evaluate({ body, headSha, isDraft, labels, repo = "" }) {
   const errors = [];
   const warnings = [];
   if (labels.includes("relay:release")) {
@@ -35,7 +38,7 @@ export function evaluate({ body, headSha, isDraft, labels }) {
   const text = stripNonContent(body ?? "");
   const strict = (message) => (isDraft ? warnings : errors).push(message);
 
-  const refs = closingRefs(text);
+  const refs = closingRefs(text, repo);
   if (refs.length !== 1) {
     errors.push(
       `閉じる Issue は 1 件だけにする（検出：${refs.length} 件${refs.length ? `，${refs.join(", ")}` : ""}）．` +
@@ -74,6 +77,7 @@ export function inputFromEvent(event) {
     headSha: pr.head.sha,
     isDraft: Boolean(pr.draft),
     labels: (pr.labels ?? []).map((l) => l.name),
+    repo: event.repository?.full_name ?? "",
   };
 }
 

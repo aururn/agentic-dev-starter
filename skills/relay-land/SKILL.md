@@ -102,8 +102,9 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
 
    `upper_head` を，載せ直しの起点と `--force-with-lease` の両方に使う．remote にだけある commit を失わないため．
 7. **バトンを `完了` にし，状態 label を外す**．
-8. **止めていた Issue を解除する**．この Issue が止めていた Issue ごとに，open の依存が残っていなければ，
-   状態 label を `relay:blocked` から `relay:ready` にする．バトンがあれば `準備済み` にする．
+8. **止めていた Issue を解除する**．この Issue が止めていた Issue のうち，状態 label が `relay:blocked` のものだけを対象にする．
+   open の依存が残っていなければ，`relay:ready` にし，バトンがあれば `準備済み` にする．
+   `relay:working` と `relay:review` の Issue（stack で先に進めている Issue）は，状態もバトンも変えない．
 
    ```bash
    gh api "repos/$repo/issues/<番号>/dependencies/blocking" --jq '.[] | select(.state=="open") | .number'
@@ -118,10 +119,13 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
     cd <元の作業場所>
     git worktree remove <Issue 用の worktree>     # worktree を使った場合だけ
     git switch <base> && git pull --ff-only
-    git branch -D <merge した branch>
+    git rev-parse <merge した branch>             # 確認済み SHA と一致するか確かめる
+    git branch -D <merge した branch>             # 一致した場合だけ
     git push origin --delete <merge した branch>  # repository の設定で自動削除される場合は不要
     ```
 
+    local の branch が確認済み SHA と違う場合は，push していない commit があるので branch を消さずに止まり，報告する．
+    squash merge では branch が merge 済みと判定されないため，`git branch -d` ではなく，SHA の一致で判断する．
 11. **報告する**．merge した commit，閉じた Issue，着手できるようになった Issue，次の一手を示す．
 
 ## release PR
@@ -152,11 +156,12 @@ branch の削除に関わるものは行わない．
    gh pr list --state merged --base <from> --limit 100 --json number,title,mergedAt
    ```
 
-2. **merge する**．`--delete-branch` は付けない．
+2. **merge する**．`merge.method` に関わらず merge commit（`--merge`）を使う．squash や rebase では `from` の commit が
+   `to` の祖先にならず，次の release で同じ変更が再び差分に出て，衝突の原因になるため．`--delete-branch` は付けない．
 
    ```bash
    gh pr ready <PR>
-   gh pr merge <PR> --<method> --match-head-commit <確認済み SHA>
+   gh pr merge <PR> --merge --match-head-commit <確認済み SHA>
    ```
 
 3. **merge が完了したか確かめる**．通常の PR の手順 4 と同じ．

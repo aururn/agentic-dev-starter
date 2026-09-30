@@ -22,7 +22,7 @@ repository に固有の値を skill の本文へ書かない．雛形は `relay-
 | `projects`           | `null`                           | GitHub Projects に登録する場合 `{ owner, number }`                   |
 | `stack`              | `false`                          | 依存する Issue の PR を，依存先の branch の上に積むか                |
 | `worktree`           | `null`                           | 並列作業の置き場所（例：`"../{repo}-{number}"`）．`null` なら使わない |
-| `merge.method`       | `squash`                         | `squash`，`merge`，`rebase` のどれか                                 |
+| `merge.method`       | `squash`                         | `squash`，`merge`，`rebase` のどれか．release PR は常に `merge` を使う |
 | `release`            | `null`                           | 統合 branch から本番 branch への release PR を使う場合 `{ from, to }` |
 
 `stack: true` と `merge.method` の `squash` または `rebase` を組み合わせると，下の PR を merge した後に，上の PR を
