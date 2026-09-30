@@ -43,19 +43,26 @@ repository に固有の値を skill の本文へ書かない．雛形は `relay-
 
 | 値                         | 動作                                                                 |
 | -------------------------- | -------------------------------------------------------------------- |
-| `auto`                     | 実装した agent とは別の agent を優先する．下の順に，使えるものを選ぶ |
+| `auto`                     | GitHub の `@codex review` を優先する．受けられない場合は，下の順に手元の方法を選ぶ |
+| `github`                   | GitHub の `@codex review` だけを使う．受けられない場合は止まって利用者に伝える |
 | `subagent`                 | Claude Code の `relay-reviewer` subagent                             |
 | command の文字列           | その command を実行する．`{base}` は `origin/<base>` に置き換える         |
 | `none`                     | 独立レビューをしない．PR の「見てほしいところ」に自己レビューのみと書く |
 
-どの方法でも，対象の PR の head を取り出した作業場所で実行する（`relay-review` の手順 2）．
+`@codex review` は，PR に comment すると Codex の GitHub 連携がレビューを付ける方法である．
+連携の設定は repository ごとに利用者が行う．連携がない，利用上限に達した，10 分待っても応答がない，
+のどれかの場合は「受けられない」とする（`relay-review` の手順 3）．
+
+手元の方法は，対象の PR の head を取り出した作業場所で実行する（`relay-review` の手順 4）．
+どの方法でも，結果と対応は PR に comment として残す．
 
 `auto` の順序：
 
-1. Claude Code で実装した場合：`codex` が使えれば `codex review --base origin/<base>`．
-2. Codex で実装した場合：`claude` が使えれば `claude -p` に relay-review の手順を渡す．
-3. 別の agent が使えない場合：Claude Code では `relay-reviewer` subagent，Codex では新しい session．
-4. どれも使えない場合：自己レビューのみであることを PR に書く．
+1. GitHub の `@codex review`．
+2. Claude Code で実装した場合：`codex` が使えれば `codex review --base origin/<base>`．
+3. Codex で実装した場合：`claude` が使えれば `claude -p` に relay-review の手順を渡す．
+4. 別の agent が使えない場合：Claude Code では `relay-reviewer` subagent，Codex では新しい session．
+5. どれも使えない場合：自己レビューのみであることを PR に書く．
 
 ## 例
 

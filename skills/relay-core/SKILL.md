@@ -53,8 +53,8 @@ relay-plan ──▶ relay-build ──▶ relay-review ──▶ relay-land
 次の操作は，利用者がその操作を明示して依頼した場合だけ行う．依頼が「Issue #12 を進めて」のような一般的な
 ものである場合は，含まれないものとして扱う．
 
-- PR の Draft 解除，merge，レビュー依頼，approve
-- force push，公開済みの履歴の書き換え，branch の削除（merge 後の自動削除を除く）
+- PR の Draft 解除，merge，人へのレビュー依頼，approve
+- force push，公開済みの履歴の書き換え，branch の削除（merge 後の自動削除と，下にある `relay-review-<PR>` を除く）
 - `relay.yml` の `checks.gated` にある検査（有料，外部サービス，本番環境）
 - 本番配備，外部サービスの設定変更，secret の変更
 - 他の人が Assignee になっている Issue での作業
@@ -63,6 +63,8 @@ relay-plan ──▶ relay-build ──▶ relay-review ──▶ relay-land
 
 - 作業 branch の作成，commit，その branch への push
 - Draft PR の作成と本文の更新，CI の再実行
+- 独立レビューのための `@codex review` の comment と，レビューの結果と対応の PR への comment
+- `relay-review` が作った local の一時 branch `relay-review-<PR>` の削除．ただし，PR の head に含まれない commit がない場合に限る
 - 自分が担当する Issue の label，Assignee，バトンの更新
 
 ## command の例について
