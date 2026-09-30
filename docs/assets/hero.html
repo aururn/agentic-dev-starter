@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 560px; }
+  body {
+    font-family: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
+    display: flex; align-items: center; justify-content: center; gap: 28px;
+    color: #1f2328;
+  }
+  .card {
+    background: #ffffff; border-radius: 12px;
+    box-shadow: 0 24px 60px rgba(17, 12, 46, .35), 0 2px 6px rgba(17, 12, 46, .15);
+    overflow: hidden;
+  }
+  .bar { height: 34px; background: #f6f8fa; border-bottom: 1px solid #d1d9e0; display: flex; align-items: center; padding: 0 14px; gap: 7px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .bar .url { margin-left: 14px; font-size: 12px; color: #59636e; }
+  .issue { width: 640px; }
+  .issue .head { padding: 20px 24px 14px; border-bottom: 1px solid #d1d9e0; }
+  .title { font-size: 21px; font-weight: 600; }
+  .title span { color: #59636e; font-weight: 400; }
+  .meta { margin-top: 10px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; }
+  .pill { border-radius: 999px; padding: 3px 10px; font-weight: 600; }
+  .open { background: #1f883d; color: #fff; }
+  .epic { background: #3e4b9e; color: #fff; }
+  .count { border: 1px solid #d1d9e0; color: #59636e; }
+  .sub { padding: 10px 24px 4px; font-size: 12.5px; font-weight: 600; color: #59636e; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 9px 24px; border-top: 1px solid #eff2f5; font-size: 14px; }
+  .row:first-of-type { border-top: 0; }
+  .check { width: 16px; height: 16px; border-radius: 50%; background: #8250df; flex: none; position: relative; }
+  .check::after { content: ""; position: absolute; left: 5px; top: 2.5px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .row .t { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .n { color: #59636e; }
+  .merged { font-size: 12px; font-weight: 600; color: #8250df; background: #fbefff; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+  .side { display: flex; flex-direction: column; gap: 22px; width: 400px; }
+  .baton .body { padding: 16px 20px 18px; font-size: 13.5px; }
+  .who { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #a5b4fc, #f0abfc); }
+  .who b { font-size: 14px; }
+  .who span { color: #59636e; font-size: 12.5px; }
+  .state { display: inline-block; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: #dafbe1; color: #116329; border-radius: 6px; padding: 2px 8px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  td { border: 1px solid #d1d9e0; padding: 6px 10px; font-size: 13px; }
+  td:first-child { color: #59636e; width: 34%; background: #f6f8fa; }
+  .pr .body { padding: 16px 20px 18px; }
+  .pr .ttl { font-size: 15px; font-weight: 600; }
+  .pr .ttl span { color: #59636e; font-weight: 400; }
+  .checks { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+  .ok { display: flex; align-items: center; gap: 8px; }
+  .ok i { width: 14px; height: 14px; border-radius: 50%; background: #1f883d; position: relative; flex: none; }
+  .ok i::after { content: ""; position: absolute; left: 4.5px; top: 2px; width: 3.5px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; background: #eff2f5; border-radius: 5px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+  <div class="card issue">
+    <div class="bar"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div><div class="url">github.com/aururn/agentic-dev-starter/issues/5</div></div>
+    <div class="head">
+      <div class="title">Relay の初版で見つかった不具合を直す <span>#5</span></div>
+      <div class="meta"><span class="pill open">Open</span><span class="pill epic">epic</span><span class="pill count">sub-issues 6 / 6</span></div>
+    </div>
+    <div class="sub">Sub-issues</div>
+    <div class="row"><div class="check"></div><div class="t">レビューを GitHub の @codex review で行うようにする <span class="n">#6</span></div><div class="merged">#14 merged</div></div>
+    <div class="row"><div class="check"></div><div class="t">relay-build の手順の漏れを直す <span class="n">#7</span></div><div class="merged">#13 merged</div></div>
+    <div class="row"><div class="check"></div><div class="t">relay-handoff の再開と relay-land の後片付けを直す <span class="n">#8</span></div><div class="merged">#12 merged</div></div>
+    <div class="row"><div class="check"></div><div class="t">PR 本文の検査と CI の誤判定を直す <span class="n">#9</span></div><div class="merged">#15 merged</div></div>
+    <div class="row"><div class="check"></div><div class="t">relay-adopt を既存の repository で迷わず使えるようにする <span class="n">#10</span></div><div class="merged">#16 merged</div></div>
+    <div class="row" style="padding-bottom:16px"><div class="check"></div><div class="t">GitHub の一覧と依存の読み方を直す <span class="n">#11</span></div><div class="merged">#17 merged</div></div>
+  </div>
+  <div class="side">
+    <div class="card baton">
+      <div class="body">
+        <div class="who"><div class="avatar"></div><div><b>aururn</b> <span>バトン · #7</span></div></div>
+        Relay 状態：<span class="state">完了</span>
+        <table>
+          <tr><td>branch</td><td><code>fix/7-relay-build-steps</code></td></tr>
+          <tr><td>PR</td><td>#13（merge 済み）</td></tr>
+          <tr><td>次の一手</td><td>なし</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card pr">
+      <div class="body">
+        <div class="ttl">close gaps in relay-build <span>#13</span></div>
+        <div class="checks">
+          <div class="ok"><i></i>確認した head：<code>b2a8e1c</code></div>
+          <div class="ok"><i></i>check，relay-pr-policy</div>
+          <div class="ok"><i></i>独立レビュー：P0/P1 なし</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
