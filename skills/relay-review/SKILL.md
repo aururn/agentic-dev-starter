@@ -57,10 +57,11 @@ command の例の `$repo` は，`relay-core` の「command の例について」
    ```bash
    bot='chatgpt-codex-connector[bot]'
    since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-   gh pr comment <PR> --body "@codex review"
+   url=$(gh pr comment <PR> --body "@codex review")
+   request_id=${url##*issuecomment-}    # 依頼の comment の id
    ```
 
-   30 秒ごとに次の 3 つを読み，`since` より後の bot の応答を探す．
+   前の依頼の応答を待っている間は，新しく依頼しない．30 秒ごとに次の 4 つを読み，`since` より後の bot の応答を探す．
 
    ```bash
    # review（本文と，レビューした commit）
@@ -72,6 +73,9 @@ command の例の `$repo` は，`relay-core` の「command の例について」
    # PR への comment（指摘なし，利用上限，error の知らせ）
    gh api "repos/$repo/issues/<PR>/comments" --paginate \
      --jq ".[] | select(.user.login == \"$bot\" and .created_at > \"$since\") | [.id, .body] | @tsv"
+   # 依頼の comment への reaction（👀 はレビュー中，👍 は指摘なし）
+   gh api "repos/$repo/issues/comments/$request_id/reactions" \
+     --jq ".[] | select(.user.login == \"$bot\") | .content"
    ```
 
    結果を次の表で判断する．
@@ -79,11 +83,13 @@ command の例の `$repo` は，`relay-core` の「command の例について」
    | bot の応答 | 判断 | 次の手順 |
    | --- | --- | --- |
    | review が付いた | 行ごとの指摘を読む．review の `commit_id` が控えた head と同じか確かめる | 手順 5 |
-   | 指摘がないという comment が付いた | 「P0/P1 なし」とする | 手順 5 |
+   | 指摘がないという comment，または 👍 の reaction が付いた | 依頼から今までに PR の head が変わっていなければ「P0/P1 なし」とする | 手順 5 |
    | 利用上限（`usage limits`）や error の comment が付いた | GitHub では受けられない | 手順 4 |
-   | 10 分待っても応答がない | 連携がない，または止まっているとみなす | 手順 4 |
+   | 10 分待っても，👀 の reaction も他の応答もない | 連携がない，または止まっているとみなす | 手順 4 |
 
-   review の `commit_id` が控えた head と違う場合は，今の head で手順 3 をやり直す．
+   指摘なしの comment と reaction は，レビューした commit を示さない．そのため，`gh pr view <PR> --json headRefOid` が
+   控えた head のままであることを確かめる．review の `commit_id` が違う場合や，head が変わった場合は，今の head で手順 3 をやり直す．
+   👀 の reaction があり応答がまだない場合は，さらに 10 分まで待つ．
    `review.independent` が `github` の場合は，手順 4 に進まずに止まり，理由を利用者に報告する．
 4. **代わりの方法でレビューし，結果を PR に comment する**．
    - `codex review` などの command は，今の作業場所の checkout をレビューする．別の branch にいるまま実行すると，
@@ -109,10 +115,11 @@ command の例の `$repo` は，`relay-core` の「command の例について」
 
      指摘のない場合は「P0/P1 なし」と，確かめた観点の一覧を返すようにする．
    - 結果を **必ず** PR に comment する．1 行目に，使った方法と，GitHub で受けられなかった理由を書く．
+     この comment と返信には `@codex` を書かない．書くと bot が新しいレビューを始める．
      指摘には `1.`，`2.` のように番号を振り，返信で参照できるようにする．
 
      ```markdown
-     独立レビュー（手元の codex review．@codex review は利用上限のため）
+     独立レビュー（手元の codex review．GitHub の Codex 連携は利用上限のため）
      レビューした head: `a1b2c3d`
 
      1. [P1] `src/invitations/resend.ts:42`：有効な招待も再送できる．Issue #12 の例の表の 2 行目に反する．
