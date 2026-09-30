@@ -1,6 +1,5 @@
 name: 大項目
 description: 複数の Issue に分けて進める目標．実装は sub-issue で行う
-title: ""
 body:
   - type: markdown
     attributes:
