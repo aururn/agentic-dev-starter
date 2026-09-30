@@ -14,13 +14,13 @@
 依頼を Issue に分け，Issue ごとに実装，Draft PR，別の agent によるレビュー，merge の後片付けまでを進めます．
 作業の状態は会話ではなく GitHub に残るので，session が替わっても，Codex から Claude Code に替わっても，同じところから続けられます．
 
-| 1. 分ける | 2. 作る | 3. 確かめる | 4. 入れる |
+| <img src="docs/assets/icons/plan.svg" width="32" height="32" alt=""><br>1. 分ける | <img src="docs/assets/icons/build.svg" width="32" height="32" alt=""><br>2. 作る | <img src="docs/assets/icons/review.svg" width="32" height="32" alt=""><br>3. 確かめる | <img src="docs/assets/icons/land.svg" width="32" height="32" alt=""><br>4. 入れる |
 | :-: | :-: | :-: | :-: |
 | `relay-plan` | `relay-build` | `relay-review` | `relay-land` |
 | 依頼を epic と sub-issue に分ける | 1 Issue を実装して Draft PR を出す | 別の agent が PR 上でレビューする | merge して Issue と branch を片付ける |
-| **👤 分解案を承認** | | | **👤 merge を依頼** |
+| <img src="docs/assets/icons/person.svg" width="20" height="20" alt=""><br>**分解案を承認** | | | <img src="docs/assets/icons/person.svg" width="20" height="20" alt=""><br>**merge を依頼** |
 
-人が判断するのは 👤 の 2 か所だけです．途中で止めるとき，再開するとき，担当を替えるときは `relay-handoff` を使います．
+人が判断するのは，表の最後の行にある 2 か所だけです．途中で止めるとき，再開するとき，担当を替えるときは `relay-handoff` を使います．
 
 ## 使い始める
 
@@ -41,6 +41,8 @@ npx skills add aururn/agentic-dev-starter --skill '*' -a codex -a claude-code
 <tr>
 <td width="33%" valign="top">
 
+<img src="docs/assets/icons/baton.svg" width="36" height="36" alt="">
+
 ### バトン
 
 Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR，次の一手を置きます．
@@ -49,6 +51,8 @@ Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR
 </td>
 <td width="33%" valign="top">
 
+<img src="docs/assets/icons/profile.svg" width="36" height="36" alt="">
+
 ### 運用設定
 
 base branch，branch 名，PR title，検査の command，レビューの方法は `.agents/relay.yml` に書きます．
@@ -56,6 +60,8 @@ skill はどの repository でも同じです．
 
 </td>
 <td width="33%" valign="top">
+
+<img src="docs/assets/icons/evidence.svg" width="36" height="36" alt="">
 
 ### 確かめた証拠
 
@@ -163,3 +169,6 @@ scripts/ tests/     この pack 自身の検査
 ## License
 
 [Apache License 2.0](LICENSE)
+
+icon は [Heroicons](https://github.com/tailwindlabs/heroicons)（MIT License）を，色を変えて使っています．
+License の全文は [docs/assets/icons/LICENSE](docs/assets/icons/LICENSE) にあります．
