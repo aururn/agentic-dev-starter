@@ -93,7 +93,7 @@ description: 既存または新規の repository に Relay の運用を導入す
      `setup-labels.sh --dry-run` で `labels` を読めることだけを確かめ，YAML の検査は ⏭ にして理由を書く．
    - `checks.full` の command を実行して結果を控える．失敗した場合は，導入のせいか元からかを区別して報告する．
    - `gh label list` に `relay:*` の label があること．remote がない場合は ⏭ にする．
-7. **PR を出す**．`relay-build` の手順 11 から 14（commit と push，Draft PR，CI を待つ，状態の更新）と同じにする．
+7. **PR を出す**．`relay-build` の手順 11 から 15（commit と push，Draft PR，CI を待つ，状態の更新，レビュー）と同じにする．
    報告は，relay-build の手順 16 ではなく，この skill の手順 8 で行う．
    - `relay-pr-policy` は，この PR 自身も検査する．Issue を作れなかった場合は `Closes` の行を書けないので，PR を作らない．
    - remote がない場合は commit までにし，`git push` と `gh pr create` を予定の command として報告に書く．
@@ -111,6 +111,7 @@ description: 既存または新規の repository に Relay の運用を導入す
 - **`merge.method`**：GitHub で許可された方法が 1 つだけなら，それにする．複数ある場合は，`base` の first-parent の履歴で決める．
   親が 2 つの commit（`Merge pull request #...`）が過半数なら `merge`，subject が `(#123)` で終わる commit が過半数なら
   `squash`．どちらでもなければ既定値にする．
+  推定した値も既定値も，GitHub で今許可されている方法の中から選ぶ．既定値の `squash` が許可されていなければ，手順 2 で許可された方法から選んでもらう．
 - **`language`**：Issue，PR，commit，AGENTS.md の本文で，過半数が日本語なら `ja`，英語なら `en`．
   sample がない場合は，利用者と話している言語にし，そう書く．
 - **`checks.full`**：CI が PR で実行する command を，手元で実行できる形にしたもの．CI がない場合は，AGENTS.md や

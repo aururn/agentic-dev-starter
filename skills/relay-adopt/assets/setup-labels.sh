@@ -101,7 +101,7 @@ if [[ -f "$config" ]]; then
         value = substr(value, 2)
         sub(/'\''.*/, "", value)
       } else {
-        sub(/[[:space:]]+#.*$/, "", value)
+        sub(/(^|[[:space:]]+)#.*$/, "", value)
         sub(/[[:space:]]+$/, "", value)
         if (value ~ /^[{[]/) fail(line)
       }
