@@ -22,7 +22,7 @@
 
 人が判断するのは 👤 の 2 か所だけです．途中で止めるとき，再開するとき，担当を替えるときは `relay-handoff` を使います．
 
-## <img src="docs/assets/emoji/high-voltage.png" width="26" height="26" alt=""> 使い始める
+## ⚡ 使い始める
 
 ```bash
 # 1. repository の root で skill を入れる（Codex と Claude Code の両方に入る）
@@ -35,13 +35,13 @@ npx skills add aururn/agentic-dev-starter --skill '*' -a codex -a claude-code
 既存の repository にも入れられます．`relay-adopt` は既存の file を上書きせず，違いがあれば提案だけにします．
 更新は `npx skills update` で取り込めます．
 
-## <img src="docs/assets/emoji/puzzle-piece.png" width="26" height="26" alt=""> 3 つの仕組み
+## 🧩 3 つの仕組み
 
 <table>
 <tr>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/handshake.png" width="26" height="26" alt=""> バトン
+### 🤝 バトン
 
 Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR，次の一手を置きます．
 次の session はこれを読むだけで再開できます．
@@ -49,7 +49,7 @@ Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR
 </td>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/gear.png" width="26" height="26" alt=""> 運用設定
+### ⚙️ 運用設定
 
 base branch，branch 名，PR title，検査の command，レビューの方法は `.agents/relay.yml` に書きます．
 skill はどの repository でも同じです．
@@ -57,7 +57,7 @@ skill はどの repository でも同じです．
 </td>
 <td width="33%" valign="top">
 
-### <img src="docs/assets/emoji/check-mark-button.png" width="26" height="26" alt=""> 確かめた証拠
+### ✅ 確かめた証拠
 
 PR には，結果を得た commit（`確認した head:`）と結果を書きます．
 CI が今の head と照らし，古い結果のままの merge を止めます．
@@ -66,7 +66,7 @@ CI が今の head と照らし，古い結果のままの merge を止めます�
 </tr>
 </table>
 
-## <img src="docs/assets/emoji/memo.png" width="26" height="26" alt=""> Issue と PR の書き方
+## 📝 Issue と PR の書き方
 
 Issue の要求は，文章ではなく **例の表** で書きます．境界と例外が見やすく，そのまま test の case になります．
 
@@ -79,7 +79,7 @@ Issue の要求は，文章ではなく **例の表** で書きます．境界�
 PR は **変わること，見てほしいところ，Issue からの変更，確かめたこと，戻し方** の 5 節だけです．
 詳しい規則は [formats.md](skills/relay-core/references/formats.md) にあります．
 
-## <img src="docs/assets/emoji/keyboard.png" width="26" height="26" alt=""> コマンド
+## ⌨️ コマンド
 
 | やりたいこと | Codex | Claude Code |
 | --- | --- | --- |
@@ -90,7 +90,7 @@ PR は **変わること，見てほしいところ，Issue からの変更，�
 | merge して後片付けをする | `$relay-land 34` | `/relay-land 34` |
 | 中断，再開，交代 | `$relay-handoff` | `/relay-handoff` |
 
-## <img src="docs/assets/emoji/books.png" width="26" height="26" alt=""> 詳しく
+## 📚 詳しく
 
 <details>
 <summary><b>運用設定の例</b>（<code>.agents/relay.yml</code>）</summary>
@@ -160,12 +160,12 @@ scripts/ tests/     この pack 自身の検査
 
 </details>
 
-## <img src="docs/assets/emoji/folded-hands.png" width="26" height="26" alt=""> 参考にしたもの
+## 🙏 参考にしたもの
 
 Issue を実装前の約束，PR を実装後の記録として分ける考え方は，
 [ReoHakase/enterprise-agentic-saas-starter](https://github.com/ReoHakase/enterprise-agentic-saas-starter) の運用を参考にしました．
 文書と skill の本文，書式，仕組みはこの repository で独自に書いたものです．
 
-## <img src="docs/assets/emoji/page-facing-up.png" width="26" height="26" alt=""> License
+## 📄 License
 
 [Apache License 2.0](LICENSE)
