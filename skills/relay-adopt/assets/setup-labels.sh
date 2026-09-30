@@ -63,14 +63,15 @@ mapped_labels=(
 )
 
 # relay.yml の labels の block を「group.key<TAB>名前」の行にする．
-# block 形式（1 行に 1 つ）だけを読む．flow 形式（{ ... }）の場合は止める．
+# block 形式（1 行に 1 つ）だけを読む．flow 形式（{ ... }）と，引用符の中の escape は読めないので止める．
 mapping=""
 if [[ -f "$config" ]]; then
-  mapping=$(awk '
+  if ! mapping=$(awk '
+    function fail(s) { print "ERROR\t" s; exit 1 }
     { sub(/\r$/, "") }
     /^[^[:space:]#]/ {
       in_labels = ($0 ~ /^labels:/)
-      if (in_labels && $0 !~ /^labels:[[:space:]]*(#.*)?$/) { print "ERROR\t" $0; exit }
+      if (in_labels && $0 !~ /^labels:[[:space:]]*(#.*)?$/) fail($0)
       group = ""
       next
     }
@@ -80,34 +81,35 @@ if [[ -f "$config" ]]; then
       indent = RLENGTH
       line = substr($0, indent + 1)
       if (group == "" || indent <= group_indent) {
-        if (line !~ /^[A-Za-z0-9_-]+:[[:space:]]*(#.*)?$/) { print "ERROR\t" line; exit }
+        if (line !~ /^[A-Za-z0-9_-]+:[[:space:]]*(#.*)?$/) fail(line)
         group = line
         sub(/:.*/, "", group)
         group_indent = indent
         next
       }
-      if (line !~ /^[A-Za-z0-9_-]+:/) { print "ERROR\t" line; exit }
+      if (line !~ /^[A-Za-z0-9_-]+:/) fail(line)
       key = line
       sub(/:.*/, "", key)
       value = line
       sub(/^[^:]*:[[:space:]]*/, "", value)
       if (value ~ /^"/) {
+        if (value ~ /[\\]/) fail(line)
         value = substr(value, 2)
         sub(/".*/, "", value)
       } else if (value ~ /^'\''/) {
+        if (value ~ /'\'''\''/) fail(line)
         value = substr(value, 2)
         sub(/'\''.*/, "", value)
       } else {
         sub(/[[:space:]]+#.*$/, "", value)
         sub(/[[:space:]]+$/, "", value)
-        if (value ~ /^[{[]/) { print "ERROR\t" line; exit }
+        if (value ~ /^[{[]/) fail(line)
       }
       print group "." key "\t" value
     }
-  ' "$config")
-  if [[ "$mapping" == ERROR* ]]; then
-    echo "$config の labels を読めない：${mapping#ERROR$'\t'}" >&2
-    echo "labels は block 形式（1 行に 1 つ．例：    fix: \"bug\"）で書く．" >&2
+  ' "$config"); then
+    echo "$config の labels を読めない：${mapping##*ERROR$'\t'}" >&2
+    echo "labels は block 形式（1 行に 1 つ．例：    fix: \"bug\"）で書く．引用符の中で escape を使わない．" >&2
     exit 1
   fi
 else
@@ -154,6 +156,8 @@ handle() {
     echo "作らない：対応づけが空（既定の名前は $default）" >&2
   elif ! exists "$name"; then
     run gh label create "$name" --color "$color" --description "$description"
+    # 同じ名前に複数の種別を対応づけた場合に，2 回作らない．
+    existing+=$'\n'"$name"
   elif [[ "$update" == true && "$name" == "$default" ]]; then
     run gh label edit "$name" --color "$color" --description "$description"
   else
