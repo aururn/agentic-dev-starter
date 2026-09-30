@@ -18,13 +18,18 @@ merge は承認が必要な操作である．利用者がこの PR の merge を
 | 確認                                             | 方法                                                              |
 | ------------------------------------------------ | ----------------------------------------------------------------- |
 | 今の head の CI が全て成功している               | `gh pr checks <PR>`                                               |
-| 今の head で独立レビューが済み，P0/P1 がない      | 最後の relay-review の報告の head と，今の head を比べる          |
+| 今の head でレビューが済み，P0/P1 がない          | 最後の relay-review の報告の head と，今の head を比べる．下の注を参照 |
 | base の最新を取り込んでも衝突しない              | `gh pr view <PR> --json mergeable,mergeStateStatus`               |
 | 本文の「確認した head:」が今の head と一致する   | `gh pr view <PR> --json headRefOid,body`                          |
 | 閉じる Issue が 1 件で，その Issue が epic でない | 下の「閉じる Issue の取り方」                                     |
 | stack の場合，下の PR が先に merge されている    | PR の base が `relay.yml` の `base` であること                    |
 
-独立レビューの後に push があった場合は，`relay-review` をやり直す．
+レビューの後に push があった場合は，`relay-review` をやり直す．
+
+レビューは原則として独立レビューとする．ただし，`review.independent` が `none` の場合と，`auto` で別の agent を使えなかった場合は，
+今の head の自己レビューで足りる．その場合は，PR の「見てほしいところ」に自己レビューのみである理由が書かれていることを確かめる．
+
+確かめた時点の `headRefOid` を控えておく．手順 4 でこの SHA を指定し，確かめていない commit が merge されないようにする．
 
 ### 閉じる Issue の取り方
 
@@ -50,10 +55,10 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
    gh pr list --state open --base <この PR の branch> --json number,headRefName
    ```
 
-4. `merge.method` で merge する．
+4. `merge.method` で merge する．`--match-head-commit` に手順 1 で控えた SHA を渡す．head が変わっていて失敗した場合は，手順 1 からやり直す．
 
    ```bash
-   gh pr merge <PR> --<method> --delete-branch
+   gh pr merge <PR> --<method> --delete-branch --match-head-commit <控えた SHA>
    ```
 
 5. **merge が完了したか確かめる**．merge queue や auto-merge の repository では，`gh pr merge` が成功しても queue に入っただけの
@@ -109,11 +114,18 @@ GitHub は，PR の base が default branch の場合だけ `Closes #N` を clos
 
 ## release PR
 
-`relay.yml` の `release` がある場合，`from` から `to` への PR は release PR として扱う．
+`relay.yml` の `release` がある場合，`from` から `to` への PR は release PR として扱う．release PR には，上の手順のうち
+1，2，4，5，12 だけを使う．`from` の branch は merge の後も使い続けるので，次のことを必ず守る．
 
+- `gh pr merge` に `--delete-branch` を付けない．`from` の branch を削除しない．
+- stack の付け替え（手順 3，7），Issue の close（手順 6），バトンと依存の更新（手順 8，9）を行わない．
 - 含まれる PR を `gh pr list --state merged --base <from>` と差分から集め，一覧と移行手順を本文に書く．
 - `relay:release` label を付ける．Issue は閉じない．
 - merge は通常の PR と同じく，利用者の明示の依頼がある場合だけ行う．
+
+```bash
+gh pr merge <PR> --<method> --match-head-commit <控えた SHA>
+```
 
 ## してはいけないこと
 

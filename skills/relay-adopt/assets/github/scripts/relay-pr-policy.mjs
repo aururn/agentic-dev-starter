@@ -62,18 +62,30 @@ export function evaluate({ body, headSha, isDraft, labels }) {
   return { errors, warnings, skipped: false };
 }
 
-function main() {
-  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+/**
+ * GitHub の event から検査の入力を作る．PR の event でなければ null を返す．
+ * merge queue（merge_group）では，PR の本文は PR の event で検査済みなので検査しない．
+ */
+export function inputFromEvent(event) {
   const pr = event.pull_request;
-  const result = evaluate({
+  if (!pr) return null;
+  return {
     body: pr.body ?? "",
     headSha: pr.head.sha,
     isDraft: Boolean(pr.draft),
     labels: (pr.labels ?? []).map((l) => l.name),
-  });
+  };
+}
+
+function main() {
+  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+  const input = inputFromEvent(event);
+  const result = input ? evaluate(input) : { errors: [], warnings: [], skipped: true };
 
   const lines = [];
-  if (result.skipped) {
+  if (!input) {
+    lines.push("PR の event ではない（merge queue など）ので検査しない．");
+  } else if (result.skipped) {
     lines.push("relay:release の PR なので検査しない．");
   }
   for (const w of result.warnings) {

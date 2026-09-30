@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { closingRefs, evaluate } from "../skills/relay-adopt/assets/github/scripts/relay-pr-policy.mjs";
+import { closingRefs, evaluate, inputFromEvent } from "../skills/relay-adopt/assets/github/scripts/relay-pr-policy.mjs";
 
 const HEAD_SHA = "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678";
 const body = (lines) => lines.join("\n");
@@ -67,5 +67,16 @@ describe("evaluate", () => {
   test("英語の Verified head と大文字の SHA も受け付ける", () => {
     const result = run({ body: valid.replace("確認した head: `a1b2c3d`", "Verified head: A1B2C3D") });
     assert.deepEqual(result.errors, []);
+  });
+});
+
+describe("inputFromEvent", () => {
+  test("PR の event から本文，head，Draft，label を取り出す", () => {
+    const event = { pull_request: { body: "Closes #1", head: { sha: HEAD_SHA }, draft: true, labels: [{ name: "relay:review" }] } };
+    assert.deepEqual(inputFromEvent(event), { body: "Closes #1", headSha: HEAD_SHA, isDraft: true, labels: ["relay:review"] });
+  });
+
+  test("merge queue の event では検査の入力を作らない", () => {
+    assert.equal(inputFromEvent({ merge_group: { head_sha: HEAD_SHA } }), null);
   });
 });
