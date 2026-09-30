@@ -32,18 +32,14 @@ coding agent に Issue 単位で作業を任せると，次のことが起きる
 
 ## 段階と承認
 
-```mermaid
-flowchart LR
-  R[依頼] --> P[relay-plan]
-  P --> A{分解案を承認}
-  A --> B[relay-build]
-  B --> V[relay-review]
-  V -->|P0/P1 あり| B
-  V --> M{merge を依頼}
-  M --> L[relay-land]
-  L -->|止めていた Issue が ready に| B
-  H[relay-handoff] -.中断・再開・交代.- B
-```
+| 段階 | skill | 人の判断 | 次へ進む条件 |
+| --- | --- | --- | --- |
+| 1. 分ける | `relay-plan` | 分解案を承認する | Issue ができた |
+| 2. 作る | `relay-build` | なし | Draft PR と CI が成功した |
+| 3. 確かめる | `relay-review` | なし | P0/P1 がない．ある場合は 2 に戻る |
+| 4. 入れる | `relay-land` | merge を依頼する | 止めていた Issue が ready になり，2 に進める |
+
+中断，再開，担当の交代は，どの段階からでも `relay-handoff` で行う．
 
 人が判断するのは，**分解案の承認** と **merge の依頼** の 2 か所だけである．それ以外の可逆な操作
 （branch，commit，push，Draft PR，label，バトン）は，Issue 単位の依頼に含まれるものとして agent が進める．

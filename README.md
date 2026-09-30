@@ -1,57 +1,99 @@
+<div align="center">
+
 # Relay
 
-**Issue を単位に，人と coding agent（Codex / Claude Code）が GitHub 上で作業を引き継ぐための skill pack．**
+**Issue を単位に，人と coding agent が GitHub 上で作業を引き継ぐ skill pack**
 
-依頼を Issue に分け，Issue ごとに branch，実装，Draft PR，別の agent によるレビュー，merge の後片付けまでを進めます．
-作業の状態は会話ではなく GitHub（Issue のバトン comment）に置くので，session が替わっても，Codex から Claude Code に
-替わっても，同じところから続けられます．既存の repository にも，新しい repository にも入れられます．
+[![CI](https://github.com/aururn/agentic-dev-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/aururn/agentic-dev-starter/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/aururn/agentic-dev-starter)](LICENSE)
+![Codex](https://img.shields.io/badge/Codex-supported-111111)
+![Claude Code](https://img.shields.io/badge/Claude_Code-supported-D97757)
 
-```text
-relay-plan ──▶ relay-build ──▶ relay-review ──▶ relay-land
- 依頼を分ける    1 Issue を実装    別の agent で検査   merge と後片付け
-   ▲ 承認                                            ▲ merge の依頼
-                 relay-handoff：中断，再開，交代（どの段階からでも）
-```
+</div>
 
-人が判断するのは **分解案の承認** と **merge の依頼** の 2 か所だけです．
+依頼を Issue に分け，Issue ごとに実装，Draft PR，別の agent によるレビュー，merge の後片付けまでを進めます．
+作業の状態は会話ではなく GitHub に残るので，session が替わっても，Codex から Claude Code に替わっても，同じところから続けられます．
 
-## 入れる
+| 1. 分ける | 2. 作る | 3. 確かめる | 4. 入れる |
+| :-: | :-: | :-: | :-: |
+| `relay-plan` | `relay-build` | `relay-review` | `relay-land` |
+| 依頼を epic と sub-issue に分ける | 1 Issue を実装して Draft PR を出す | 別の agent が PR 上でレビューする | merge して Issue と branch を片付ける |
+| **👤 分解案を承認** | | | **👤 merge を依頼** |
 
-repository の root で実行します（Node.js が必要です）．
+人が判断するのは 👤 の 2 か所だけです．途中で止めるとき，再開するとき，担当を替えるときは `relay-handoff` を使います．
+
+## 使い始める
 
 ```bash
+# 1. repository の root で skill を入れる（Codex と Claude Code の両方に入る）
 npx skills add aururn/agentic-dev-starter --skill '*' -a codex -a claude-code
 ```
 
-次に，agent に導入を依頼します．agent が repository を調べて運用設定の案を出すので，確かめて承認します．
+2. agent に `$relay-adopt`（Codex）または `/relay-adopt`（Claude Code）と頼み，出てきた運用設定の案を承認する．
+3. 作りたいものを `/relay-plan 〇〇を作りたい` と頼む．あとは Issue ごとに `/relay-build 12` を実行する．
 
-| Codex          | Claude Code    |
-| -------------- | -------------- |
-| `$relay-adopt` | `/relay-adopt` |
-
-`relay-adopt` は次を行います．既存の file は上書きせず，違いがある場合は提案だけにします．
-
-- `.agents/relay.yml`（運用設定）を，merge 済みの PR，commit，CI，scripts から推定して作る
-- `AGENTS.md` と `CLAUDE.md` に Relay の節を追記する（marker の間だけを管理する）
-- Issue の template（作業，不具合，調査，大項目）と PR の template を置く
-- PR 本文を検査する workflow（`relay-pr-policy`）と label を足す
-
+既存の repository にも入れられます．`relay-adopt` は既存の file を上書きせず，違いがあれば提案だけにします．
 更新は `npx skills update` で取り込めます．
 
-## 使う
+## 3 つの仕組み
 
-| やりたいこと                     | Codex               | Claude Code         |
-| -------------------------------- | ------------------- | ------------------- |
-| 依頼を Issue に分ける            | `$relay-plan 〇〇を作りたい` | `/relay-plan 〇〇を作りたい` |
-| Issue を実装して Draft PR を出す | `$relay-build 12`   | `/relay-build 12`   |
-| PR を別の目でレビューする        | `$relay-review 34`  | `/relay-review 34`  |
-| merge して後片付けをする         | `$relay-land 34`    | `/relay-land 34`    |
-| 中断，再開，交代                 | `$relay-handoff`    | `/relay-handoff`    |
+<table>
+<tr>
+<td width="33%" valign="top">
 
-## 特徴
+### 🏃 バトン
 
-**repository ごとの違いは `.agents/relay.yml` に書く．** base branch，branch 名，PR title の規則，検査の command，
-独立レビューの方法，Projects，stack，worktree，release PR を設定できます．skill 自体は全ての repository で同じです．
+Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR，次の一手を置きます．
+次の session はこれを読むだけで再開できます．
+
+</td>
+<td width="33%" valign="top">
+
+### ⚙️ 運用設定
+
+base branch，branch 名，PR title，検査の command，レビューの方法は `.agents/relay.yml` に書きます．
+skill はどの repository でも同じです．
+
+</td>
+<td width="33%" valign="top">
+
+### 🧾 確かめた証拠
+
+PR には，結果を得た commit（`確認した head:`）と結果を書きます．
+CI が今の head と照らし，古い結果のままの merge を止めます．
+
+</td>
+</tr>
+</table>
+
+## Issue と PR の書き方
+
+Issue の要求は，文章ではなく **例の表** で書きます．境界と例外が見やすく，そのまま test の case になります．
+
+| 状況 | 入力・操作 | 期待する結果 |
+| --- | --- | --- |
+| 管理者，招待は期限切れ | 再送する | 新しい招待を 1 件作り，古い招待を無効にする |
+| 管理者，招待は有効 | 再送する | 再送せず，「まだ有効です」と返す |
+| 管理者でない member | 再送する | 権限エラーを返す |
+
+PR は **変わること，見てほしいところ，Issue からの変更，確かめたこと，戻し方** の 5 節だけです．
+詳しい規則は [formats.md](skills/relay-core/references/formats.md) にあります．
+
+## コマンド
+
+| やりたいこと | Codex | Claude Code |
+| --- | --- | --- |
+| 導入する | `$relay-adopt` | `/relay-adopt` |
+| 依頼を Issue に分ける | `$relay-plan 〇〇を作りたい` | `/relay-plan 〇〇を作りたい` |
+| Issue を実装して Draft PR を出す | `$relay-build 12` | `/relay-build 12` |
+| PR をレビューする | `$relay-review 34` | `/relay-review 34` |
+| merge して後片付けをする | `$relay-land 34` | `/relay-land 34` |
+| 中断，再開，交代 | `$relay-handoff` | `/relay-handoff` |
+
+## 詳しく
+
+<details>
+<summary><b>運用設定の例</b>（<code>.agents/relay.yml</code>）</summary>
 
 ```yaml
 base: staging
@@ -66,35 +108,27 @@ review:
 release: { from: staging, to: main }
 ```
 
-**状態はバトン comment に置く．** Issue ごとに 1 つの comment を上書きし，状態，担当，branch，PR，次の一手，
-手元だけにある変更を書きます．次の session は，これを読めば再開できます．
+全ての項目と既定値は [profile.md](skills/relay-core/references/profile.md) にあります．
 
-**振る舞いは例の表で書く．** Issue の要求を文章ではなく表で書くので，境界と例外が見やすく，そのまま test の case になります．
+</details>
 
-| 状況                   | 入力・操作 | 期待する結果                                 |
-| ---------------------- | ---------- | -------------------------------------------- |
-| 管理者，招待は期限切れ | 再送する   | 新しい招待を 1 件作り，古い招待を無効にする |
-| 管理者，招待は有効     | 再送する   | 再送せず，「まだ有効です」と返す            |
-| 管理者でない member    | 再送する   | 権限エラーを返す                             |
+<details>
+<summary><b>CI の検査</b>（<code>relay-pr-policy</code>）</summary>
 
-**PR は 5 節だけ．** 変わること，見てほしいところ，Issue からの変更，確かめたこと，戻し方．
-「確かめたこと」には結果を得た commit（`確認した head:`）を書き，CI が今の head と一致するかを検査します．
-
-**merge の後まで面倒を見る．** Issue が閉じたかの確認，止めていた Issue の解除，stack の付け替え，worktree の片付けを行います．
-
-## CI の検査（relay-pr-policy）
-
-| 検査                                      | Draft の間 | Draft 解除後 |
-| ----------------------------------------- | ---------- | ------------ |
-| 閉じる Issue（`Closes #N`）が 1 件だけか  | 失敗       | 失敗         |
-| `確認した head:` が今の head と一致するか | 警告       | 失敗         |
-| 「確かめたこと」に ❌ が残っていないか    | 警告       | 失敗         |
+| 検査 | Draft の間 | Draft 解除後 |
+| --- | --- | --- |
+| 閉じる Issue（`Closes #N`）が 1 件だけか | 失敗 | 失敗 |
+| `確認した head:` が今の head と一致するか | 警告 | 失敗 |
+| 「確かめたこと」に ❌ が残っていないか | 警告 | 失敗 |
 
 branch protection の required check に `relay-pr-policy` を足すと，古い検査結果のまま merge されるのを防げます．
 
-## 承認が必要な操作
+</details>
 
-agent は次の操作を，利用者が明示して依頼した場合だけ行います．
+<details>
+<summary><b>agent が承認なしにしないこと</b></summary>
+
+次の操作は，利用者が明示して依頼した場合だけ行います．
 
 - PR の Draft 解除，merge，人へのレビュー依頼，approve
 - force push，公開済みの履歴の書き換え
@@ -104,7 +138,10 @@ agent は次の操作を，利用者が明示して依頼した場合だけ行�
 branch の作成，commit，作業 branch への push，Draft PR，`@codex review` とレビューの結果の comment，label，バトンの更新は，
 Issue 単位の依頼に含まれるものとして進めます．
 
-## 構成
+</details>
+
+<details>
+<summary><b>repository の構成</b></summary>
 
 ```text
 skills/
@@ -118,6 +155,10 @@ skills/
 docs/               設計（concept.md）と判断の記録（decisions/）
 scripts/ tests/     この pack 自身の検査
 ```
+
+設計の考え方は [docs/concept.md](docs/concept.md)，判断の記録は [docs/decisions/](docs/decisions/README.md) にあります．
+
+</details>
 
 ## 参考にしたもの
 
