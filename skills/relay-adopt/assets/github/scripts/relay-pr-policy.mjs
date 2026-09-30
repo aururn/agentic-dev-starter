@@ -25,19 +25,23 @@ export function stripInlineCode(text) {
 
 /**
  * 「確かめたこと」の節の本文を返す．節は次の同じ深さ以上の見出しの手前で終わる．
+ * 節が複数あれば全てをつなげて返す．節の 1 つだけを見て，他の節の ❌ を見逃さないため．
  * 節がない場合は null を返す．
  */
 export function verifiedSection(text) {
-  const lines = text.replace(/\r\n?/g, "\n").split("\n");
-  const start = lines.findIndex((line) => VERIFIED_SECTION.test(line.match(HEADING)?.[2] ?? ""));
-  if (start === -1) return null;
-  const level = lines[start].match(HEADING)[1].length;
-  const rest = lines.slice(start + 1);
-  const end = rest.findIndex((line) => {
+  const sections = [];
+  let current = null;
+  for (const line of text.replace(/\r\n?/g, "\n").split("\n")) {
     const h = line.match(HEADING);
-    return h && h[1].length <= level;
-  });
-  return (end === -1 ? rest : rest.slice(0, end)).join("\n");
+    if (h && current && h[1].length <= current.level) current = null;
+    if (h && VERIFIED_SECTION.test(h[2])) {
+      current = { level: h[1].length, lines: [] };
+      sections.push(current);
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  return sections.length ? sections.map((s) => s.lines.join("\n")).join("\n") : null;
 }
 
 /**

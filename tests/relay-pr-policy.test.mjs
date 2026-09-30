@@ -48,6 +48,11 @@ describe("verifiedSection", () => {
     assert.equal(verifiedSection(text), body(["b", "### 詳細", "c"]));
   });
 
+  test("節が複数あれば全てを返す", () => {
+    const text = body(["## Verification", "| ✅ | a |", "## 戻し方", "x", "## 確かめたこと", "| ❌ | b |"]);
+    assert.equal(verifiedSection(text), body(["| ✅ | a |", "| ❌ | b |"]));
+  });
+
   test("節がなければ null を返す", () => {
     assert.equal(verifiedSection(body(["## 変わること", "a"])), null);
   });
@@ -99,6 +104,11 @@ describe("evaluate", () => {
   test("❌ の行が「確かめたこと」の後の節にあっても，確かめたことが全て ✅ なら通る", () => {
     const result = run({ body: `${valid}\n\n## 戻し方\n\n| ❌ | 旧版 |` });
     assert.deepEqual(result.errors, []);
+  });
+
+  test("2 つ目の「確かめたこと」の節に ❌ がある PR は Draft 解除後に失敗する", () => {
+    const result = run({ body: `${valid}\n\n## Verification\n\n| ❌ | integration | 失敗 |` });
+    assert.equal(result.errors.length, 1);
   });
 
   test("「確かめたこと」の節がない PR は本文全体の ❌ を見る", () => {
