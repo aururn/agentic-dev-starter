@@ -1,0 +1,112 @@
+name: 不具合
+description: 再現できる不具合と，修正後の要求振る舞い
+title: ""
+labels:
+  - type:bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        修正後の期待は「要求振る舞い」に書き，「実際の動作」と混ぜない．
+        secret，token，個人情報を log，画像，動画に含めない．
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 深刻度
+      description: 目安は docs/architecture/issue-pr-authoring.md を参照する
+      options:
+        - P0 - data の破壊，security 事故，全利用者が使えない
+        - P1 - 主要機能が使えない，回避策がない
+        - P2 - 機能の一部が使えない，回避策がある
+        - P3 - 軽微
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: ゴール
+      description: 何が直ればよいかを 1〜2 文で書く
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 現在観測している結果
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 要求振る舞い
+      description: 修正後の規則を Given-When-Then で書く
+      render: text
+      placeholder: |
+        Scenario: 上限を超える file を拒否する
+        Given: file size の上限が 20 MB である
+        When: 20 MB を超える file を upload する
+        Then: file を保存せず size limit error を返す
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 再現手順
+      description: 不具合を再現する最小の手順
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境
+      description: OS，browser，commit，実行環境など再現に必要な条件
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 証拠
+      description: 機密情報を除いた log，画像，動画，発生頻度．ない場合は理由
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 受け入れ条件
+      placeholder: |
+        - [ ] 再現手順で不具合が起きない
+        - [ ] 再現する回帰テストがある
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: テスト計画
+      description: 再現する回帰テストの層と代表 case
+      placeholder: |
+        | 振る舞い・リスク | 層 | 代表 case | 自動化しない理由 |
+        | --- | --- | --- | --- |
+        | size 上限 | U | 上限未満，上限ちょうど，上限超過 | - |
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: 変更予定
+      description: 変更予定の path．原因が未確定なら調査内容を書く
+    validations:
+      required: true

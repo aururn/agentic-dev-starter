@@ -1,0 +1,72 @@
+name: 大項目（epic）
+description: 複数の PR に分けて進める大きな作業．実装は sub-issue で行う
+title: ""
+labels:
+  - epic
+body:
+  - type: markdown
+    attributes:
+      value: |
+        epic は PR で閉じない．実装と個別のシナリオは sub-issue に書く．
+        親子関係と依存は GitHub の sub-issue と blocked by で管理し，本文の分解案は計画時点の記録として扱う．
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: ゴール
+      description: 全ての sub-issue が完了したら何ができるようになるか
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了の定義
+      description: epic を close してよい条件
+      placeholder: |
+        - [ ] 全ての sub-issue が close されている
+        - [ ] 利用者が一連の操作を最後まで行える
+    validations:
+      required: true
+
+  - type: textarea
+    id: breakdown
+    attributes:
+      label: 分解案
+      description: sub-issue の計画．順序は依存関係の順にする
+      placeholder: |
+        | 順序 | sub-issue | サイズ | 依存 |
+        | --- | --- | --- | --- |
+        | 1 | DB に招待の期限を追加する | S | - |
+        | 2 | 招待の再送 API を追加する | M | 1 |
+        | 3 | 再送の画面を追加する | M | 2 |
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 範囲
+      value: |
+        **対象**
+        -
+
+        **対象外**
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: 参照
+      description: 正本の docs，ADR，exec plan，外部仕様
+    validations:
+      required: false
