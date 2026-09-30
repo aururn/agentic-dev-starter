@@ -60,7 +60,7 @@ gh issue develop <番号> --name <branch> --base <base> --checkout
 gh issue develop --list <番号>
 
 # Issue を閉じる予定の open PR（本文に closing keyword と番号がある PR だけ）
-gh api --paginate "repos/$repo/pulls?state=open&per_page=100" --jq '.[] | select((.body // "") |
+gh api --paginate -X GET "repos/$repo/pulls" -f state=open -f per_page=100 --jq '.[] | select((.body // "") | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") |
   test("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#<番号>($|[^0-9])"; "i")) |
   [.number, .head.ref, .draft] | @tsv'
 
@@ -69,7 +69,7 @@ gh pr edit <PR> --body-file pr.md
 gh pr view <PR> --json headRefOid,isDraft,mergeable,mergeStateStatus,closingIssuesReferences
 
 # PR が閉じる Issue を本文の closing keyword から取る（closingIssuesReferences が空の場合）
-gh pr view <PR> --json body --jq '[.body | scan("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#([0-9]+)"; "i") | .[3]] | unique | .[]'
+gh pr view <PR> --json body --jq '[.body | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") | scan("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#([0-9]+)"; "i") | .[3]] | unique | .[]'
 gh pr checks <PR> --watch
 ```
 

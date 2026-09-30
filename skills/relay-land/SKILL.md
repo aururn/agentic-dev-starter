@@ -48,7 +48,7 @@ base が default branch でも，closing link が作られないことがある�
   Issue は GitHub が自動で閉じないため，merge の後に手順 5 で閉じる．
 
   ```bash
-  gh pr view <PR> --json body --jq '[.body | scan("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#([0-9]+)"; "i") | .[3]] | unique | .[]'
+  gh pr view <PR> --json body --jq '[.body | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") | scan("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#([0-9]+)"; "i") | .[3]] | unique | .[]'
   gh issue view <番号> --json number,state,labels,title
   ```
 
@@ -58,7 +58,7 @@ base が default branch でも，closing link が作られないことがある�
 2. **stack の上の PR を控える**．この PR の branch を base にしている open PR を探す．
 
    ```bash
-   gh api --paginate "repos/$repo/pulls?state=open&base=<この PR の branch>&per_page=100" --jq '.[] | [.number, .head.ref, .head.sha] | @tsv'
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=open -f base=<この PR の branch> -f per_page=100 --jq '.[] | [.number, .head.ref, .head.sha] | @tsv'
    ```
 
    あれば，この PR の確認済み SHA を「下の PR の最後の commit」として控える．手順 6 で使う．
@@ -172,7 +172,7 @@ branch の削除に関わるものは行わない．
    ```bash
    git fetch origin <from> <to>
    git log --first-parent --format='%h %s' origin/<to>..origin/<from>
-   gh api --paginate "repos/$repo/pulls?state=closed&base=<from>&per_page=100" --jq '.[] | select(.merged_at) | [.number, .title, .merged_at] | @tsv'
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=closed -f base=<from> -f per_page=100 --jq '.[] | select(.merged_at) | [.number, .title, .merged_at] | @tsv'
    ```
 
 2. **merge する**．`merge.method` に関わらず merge commit（`--merge`）を使う．squash や rebase では `from` の commit が

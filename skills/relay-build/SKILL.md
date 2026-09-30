@@ -20,7 +20,7 @@ description: GitHub Issue を 1 件実装し，作業 branch，commit，push，D
    ```bash
    gh issue view <番号> --json number,title,body,labels,assignees,state
    gh issue develop --list <番号>
-   gh api --paginate "repos/$repo/pulls?state=open&per_page=100" --jq '.[] | select((.body // "") |
+   gh api --paginate -X GET "repos/$repo/pulls" -f state=open -f per_page=100 --jq '.[] | select((.body // "") | gsub("(?s)<!--.*?-->"; "") | gsub("(?s)`{3}.*?`{3}"; "") |
      test("(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[[:space:]]+#<番号>($|[^0-9])"; "i")) |
      [.number, .head.ref, .draft] | @tsv'
    gh api --paginate "repos/$repo/issues/<番号>/dependencies/blocked_by" --jq '.[] | [.number, .state] | @tsv'
